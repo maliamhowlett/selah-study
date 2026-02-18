@@ -1,0 +1,17 @@
+{
+  "name": "Selah Study",
+  "short_name": "Selah",
+  "description": "Record lectures, study the Bible, create flashcards, and grow in faith.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFAF5",
+  "theme_color": "#7C3AED",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
