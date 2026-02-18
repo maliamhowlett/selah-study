@@ -20,6 +20,8 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const shouldRestartRef = useRef(false);
+  // Track how many results we've already processed to avoid duplicates
+  const processedIndexRef = useRef(0);
 
   useEffect(() => {
     const supported =
@@ -38,27 +40,28 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     recognition.lang = "en-US";
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let finalText = "";
+      let newFinalText = "";
       let interimText = "";
 
-      for (let i = 0; i < event.results.length; i++) {
+      for (let i = processedIndexRef.current; i < event.results.length; i++) {
         const result = event.results[i];
         if (result.isFinal) {
-          finalText += result[0].transcript;
+          newFinalText += result[0].transcript;
+          // Mark this result as processed so we never re-add it
+          processedIndexRef.current = i + 1;
         } else {
           interimText += result[0].transcript;
         }
       }
 
-      if (finalText) {
-        setTranscript((prev) => prev + finalText);
+      if (newFinalText) {
+        setTranscript((prev) => prev + newFinalText);
       }
       setInterimTranscript(interimText);
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       if (event.error === "no-speech" || event.error === "aborted") {
-        // Chrome stops after silence — auto-restart if we're still supposed to be listening
         return;
       }
       console.error("Speech recognition error:", event.error);
@@ -68,8 +71,9 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
     recognition.onend = () => {
       setInterimTranscript("");
-      // Auto-restart if the user hasn't explicitly stopped
       if (shouldRestartRef.current) {
+        // Reset the processed index since a new recognition session starts fresh
+        processedIndexRef.current = 0;
         try {
           recognition.start();
         } catch {
@@ -94,6 +98,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
     recognitionRef.current = recognition;
     shouldRestartRef.current = true;
+    processedIndexRef.current = 0;
 
     try {
       recognition.start();
@@ -118,9 +123,9 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     stop();
     setTranscript("");
     setInterimTranscript("");
+    processedIndexRef.current = 0;
   }, [stop]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       shouldRestartRef.current = false;
