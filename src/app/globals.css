@@ -1,43 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FFFAF5;
-  --foreground: #1A1A2E;
-  --primary: #7C3AED;
-  --primary-hover: #6D28D9;
-  --primary-light: #EDE9FE;
-  --secondary: #F59E0B;
-  --secondary-hover: #D97706;
-  --secondary-light: #FEF3C7;
-  --accent: #EC4899;
-  --accent-light: #FCE7F3;
-  --surface: #FFFFFF;
-  --surface-hover: #F9F5FF;
-  --muted: #6B7280;
-  --border: #E5E7EB;
-  --success: #10B981;
-  --error: #EF4444;
+  --background: #FBF6F0;
+  --foreground: #4A403A;
+  --primary: #E8B4C0;
+  --primary-hover: #DA9BAB;
+  --primary-light: #FBEEF1;
+  --secondary: #B4C1A4;
+  --secondary-hover: #98A889;
+  --secondary-light: #EEF1E7;
+  --accent: #E8B4C0;
+  --accent-light: #FBEEF1;
+  --surface: #FFFDF9;
+  --surface-hover: #F7EFE7;
+  --muted: #8F827A;
+  --border: #EFE6DC;
+  --success: #A8B89A;
+  --error: #D89999;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0F0F1A;
-    --foreground: #F3F0FF;
-    --primary: #A78BFA;
-    --primary-hover: #C4B5FD;
-    --primary-light: #1E1B4B;
-    --secondary: #FBBF24;
-    --secondary-hover: #FCD34D;
-    --secondary-light: #451A03;
-    --accent: #F472B6;
-    --accent-light: #500724;
-    --surface: #1A1A2E;
-    --surface-hover: #2A2A4A;
-    --muted: #9CA3AF;
-    --border: #2A2A4A;
-    --success: #34D399;
-    --error: #F87171;
-  }
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
 }
 
 @theme inline {
@@ -57,18 +41,22 @@
   --color-border: var(--border);
   --color-success: var(--success);
   --color-error: var(--error);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.005em;
 }
 
-html {
-  scroll-behavior: smooth;
+h1, h2, h3 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
 }
 
 :focus-visible {
@@ -79,12 +67,13 @@ html {
 
 /* Gradient utilities */
 .gradient-primary {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  color: var(--foreground);
+  letter-spacing: -0.03em;
+  font-style: italic;
 }
