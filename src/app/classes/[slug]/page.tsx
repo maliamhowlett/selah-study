@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CLASSES, getClassBySlug } from "@/lib/classes";
 import { getReadingsForClass } from "@/lib/readings";
+import ClassRecordings from "@/components/ClassRecordings";
 
 export function generateStaticParams() {
   return CLASSES.map((c) => ({ slug: c.slug }));
@@ -59,6 +60,11 @@ export default async function ClassPage({
       {/* Overview */}
       <Section title="Overview">
         <p className="text-muted">{c.overview}</p>
+      </Section>
+
+      {/* Lecture Recordings */}
+      <Section title="Lecture Recordings">
+        <ClassRecordings classSlug={c.slug} />
       </Section>
 
       {/* Readings & Notes */}

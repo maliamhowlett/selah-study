@@ -3,6 +3,8 @@ export interface Transcription {
   title: string;
   text: string;
   highlights: string[];
+  classSlug?: string;
+  generatedNotes?: string;
   createdAt: string;
   updatedAt: string;
 }
