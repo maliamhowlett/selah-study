@@ -4,7 +4,15 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { saveTranscription } from "@/lib/storage";
 import type { Transcription } from "@/lib/types";
-import { CLASSES, getClassBySlug } from "@/lib/classes";
+import { createClient } from "@/lib/supabase/client";
+
+type ClassOption = {
+  slug: string;
+  courseCode: string;
+  title: string;
+  department: string | null;
+  overview: string | null;
+};
 
 function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -27,12 +35,38 @@ export default function RecordPage() {
 
   const [title, setTitle] = useState("");
   const [classSlug, setClassSlug] = useState("");
+  const [classes, setClasses] = useState<ClassOption[] | null>(null);
   const [notes, setNotes] = useState("");
   const [generatingNotes, setGeneratingNotes] = useState(false);
   const [notesError, setNotesError] = useState("");
   const [saved, setSaved] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Load the user's classes for the dropdown
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) {
+        setClasses([]);
+        return;
+      }
+      const { data } = await supabase
+        .from("classes")
+        .select("slug, course_code, title, department, overview")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+      setClasses(
+        (data ?? []).map((c) => ({
+          slug: c.slug as string,
+          courseCode: c.course_code as string,
+          title: c.title as string,
+          department: (c.department as string | null) ?? null,
+          overview: (c.overview as string | null) ?? null,
+        })),
+      );
+    });
+  }, []);
 
   // Timer that runs while recording
   useEffect(() => {
@@ -65,7 +99,7 @@ export default function RecordPage() {
     setGeneratingNotes(true);
     setNotesError("");
     try {
-      const cls = classSlug ? getClassBySlug(classSlug) : undefined;
+      const cls = classSlug ? classes?.find((c) => c.slug === classSlug) : undefined;
       const res = await fetch("/api/lecture-notes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,8 +110,8 @@ export default function RecordPage() {
             ? {
                 courseCode: cls.courseCode,
                 title: cls.title,
-                department: cls.department,
-                overview: cls.overview,
+                department: cls.department ?? "",
+                overview: cls.overview ?? undefined,
               }
             : undefined,
         }),
@@ -160,10 +194,17 @@ export default function RecordPage() {
       <select
         value={classSlug}
         onChange={(e) => setClassSlug(e.target.value)}
-        className="mb-4 w-full rounded-2xl border border-border bg-surface px-4 py-3 text-foreground focus:border-primary focus:outline-none"
+        disabled={classes === null || classes.length === 0}
+        className="mb-4 w-full rounded-2xl border border-border bg-surface px-4 py-3 text-foreground focus:border-primary focus:outline-none disabled:opacity-60"
       >
-        <option value="">— No class —</option>
-        {CLASSES.map((c) => (
+        <option value="">
+          {classes === null
+            ? "Loading classes…"
+            : classes.length === 0
+              ? "Sign in and add classes to tag recordings"
+              : "— No class —"}
+        </option>
+        {(classes ?? []).map((c) => (
           <option key={c.slug} value={c.slug}>
             {c.courseCode} · {c.title}
           </option>

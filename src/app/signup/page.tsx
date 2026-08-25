@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
   const supabase = createClient();
   const [email, setEmail] = useState("");
@@ -16,8 +16,12 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signUp({ email, password });
     setLoading(false);
     if (error) {
       setError(error.message);
@@ -31,8 +35,10 @@ export default function LoginPage() {
     <div className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl italic text-foreground">Welcome back</h1>
-          <p className="mt-3 text-muted">Sign in to your Selah Study account.</p>
+          <h1 className="text-4xl italic text-foreground">Create your account</h1>
+          <p className="mt-3 text-muted">
+            Free forever. Your notes, classes, and recordings stay private.
+          </p>
         </div>
 
         <form
@@ -59,7 +65,8 @@ export default function LoginPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mb-6 w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none"
+            placeholder="At least 6 characters"
+            className="mb-6 w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted focus:border-primary focus:outline-none"
           />
 
           {error && (
@@ -73,13 +80,13 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded-full gradient-primary py-3 text-sm text-white shadow-md hover:scale-[1.01] disabled:opacity-60"
           >
-            {loading ? "Signing in…" : "Sign in"}
+            {loading ? "Creating account…" : "Create account"}
           </button>
 
           <p className="mt-6 text-center text-sm text-muted">
-            No account yet?{" "}
-            <Link href="/signup" className="text-primary hover:underline">
-              Create one
+            Already have an account?{" "}
+            <Link href="/login" className="text-primary hover:underline">
+              Sign in
             </Link>
           </p>
         </form>

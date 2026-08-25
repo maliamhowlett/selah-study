@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getClassBySlug } from "@/lib/classes";
-import { getReadingBySlug, READINGS } from "@/lib/readings";
+import { notFound, redirect } from "next/navigation";
+import { fetchUserClassBySlug, isAuthenticated } from "@/lib/db/classes";
+import { getReadingBySlug } from "@/lib/readings";
 
-export function generateStaticParams() {
-  return READINGS.map((r) => ({ slug: r.classSlug, readingSlug: r.slug }));
-}
+// Readings are still hardcoded (not yet migrated to DB). To prevent leakage,
+// we require the current user to actually own a class matching the slug.
 
 export async function generateMetadata({
   params,
@@ -27,13 +26,16 @@ export default async function ReadingNotesPage({
   params: Promise<{ slug: string; readingSlug: string }>;
 }) {
   const { slug, readingSlug } = await params;
-  const c = getClassBySlug(slug);
+  if (!(await isAuthenticated())) redirect("/login");
+
+  const c = await fetchUserClassBySlug(slug);
+  if (!c) notFound();
+
   const r = getReadingBySlug(slug, readingSlug);
-  if (!c || !r) notFound();
+  if (!r) notFound();
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
-      {/* Back link */}
       <Link
         href={`/classes/${c.slug}`}
         className="mb-6 inline-flex items-center gap-1 text-sm text-muted hover:text-primary"
@@ -41,7 +43,6 @@ export default async function ReadingNotesPage({
         ← Back to {c.courseCode}
       </Link>
 
-      {/* Header */}
       <div className="mb-10">
         {r.assignedFor && (
           <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted">
@@ -66,20 +67,15 @@ export default async function ReadingNotesPage({
         )}
       </div>
 
-      {/* Thesis callout */}
       <div className="mb-10 rounded-3xl border border-primary/40 bg-primary-light p-6">
-        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-primary">
-          Thesis
-        </p>
+        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-primary">Thesis</p>
         <p className="text-foreground">{r.thesis}</p>
       </div>
 
-      {/* Summary */}
       <Section title="Summary">
         <p className="text-foreground/90 leading-relaxed">{r.summary}</p>
       </Section>
 
-      {/* Key Ideas */}
       <Section title="Key Ideas">
         <ul className="space-y-3">
           {r.keyIdeas.map((idea, i) => (
@@ -93,7 +89,6 @@ export default async function ReadingNotesPage({
         </ul>
       </Section>
 
-      {/* Key Quotes */}
       <Section title="Key Quotes">
         <div className="space-y-4">
           {r.keyQuotes.map((q, i) => (
@@ -102,15 +97,12 @@ export default async function ReadingNotesPage({
               className="rounded-2xl border-l-4 border-primary bg-surface p-4"
             >
               <p className="italic text-foreground/90">&ldquo;{q.quote}&rdquo;</p>
-              {q.note && (
-                <p className="mt-2 text-xs text-muted">{q.note}</p>
-              )}
+              {q.note && <p className="mt-2 text-xs text-muted">{q.note}</p>}
             </blockquote>
           ))}
         </div>
       </Section>
 
-      {/* Vocabulary */}
       <Section title="Concepts & Vocabulary">
         <dl className="space-y-3">
           {r.vocabulary.map((v, i) => (
@@ -122,7 +114,6 @@ export default async function ReadingNotesPage({
         </dl>
       </Section>
 
-      {/* Discussion Questions */}
       <Section title="Discussion Questions">
         <ul className="space-y-3">
           {r.discussionQuestions.map((q, i) => (
@@ -136,7 +127,6 @@ export default async function ReadingNotesPage({
         </ul>
       </Section>
 
-      {/* Response Paper Prompts */}
       {r.responsePaperPrompts && r.responsePaperPrompts.length > 0 && (
         <Section title="Response Paper Ideas">
           <ul className="space-y-3">
