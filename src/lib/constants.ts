@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/classes", label: "Classes" },
+  { href: "/calendar", label: "Calendar" },
   { href: "/record", label: "Record" },
   { href: "/notes", label: "Notes" },
   { href: "/study", label: "Study" },

@@ -17,6 +17,14 @@
   --border: #EFE6DC;
   --success: #A8B89A;
   --error: #D89999;
+
+  /* Calendar category accents */
+  --exam: #C4685A;
+  --exam-light: #FBE9E5;
+  --assignment: #B08733;
+  --assignment-light: #FAF2E1;
+  --club: #8085BE;
+  --club-light: #EEEFF9;
 }
 
 html {
@@ -41,6 +49,12 @@ html {
   --color-border: var(--border);
   --color-success: var(--success);
   --color-error: var(--error);
+  --color-exam: var(--exam);
+  --color-exam-light: var(--exam-light);
+  --color-assignment: var(--assignment);
+  --color-assignment-light: var(--assignment-light);
+  --color-club: var(--club);
+  --color-club-light: var(--club-light);
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
 }
