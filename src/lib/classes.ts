@@ -27,6 +27,9 @@ export type ClassInfo = {
     name: string;
     email: string;
     officeHours?: string;
+    /** Room, where the syllabus names one. Several don't. */
+    office?: string;
+    phone?: string;
   };
   additionalStaff?: {
     role: string;
@@ -58,6 +61,7 @@ export const CLASSES: ClassInfo[] = [
     instructor: {
       name: "Dr. Becky (Rebekha) Bokrand",
       email: "rbokrand@purdue.edu",
+      office: "KRAN 428 (in-person hours only)",
       officeHours:
         "Wednesdays 11:00 AM–12:30 PM (in-person KRAN 428 or virtual); Thursdays 2:00–4:00 PM (virtual only). Schedule via Calendly.",
     },
@@ -84,16 +88,16 @@ export const CLASSES: ClassInfo[] = [
       { item: "SmartBook Reviews + Syllabus Quiz (lowest dropped)", weight: "15%" },
       { item: "Online Homework via Connect (lowest dropped)", weight: "20%" },
       { item: "In-class attendance (iClicker, capped at 64 pts)", weight: "5%" },
-      { item: "Exam 1 (Ch. 1–3)", weight: "15%" },
-      { item: "Exam 2 (Ch. 4–7)", weight: "20%" },
-      { item: "Exam 3 (Ch. 1–12, comprehensive)", weight: "25%" },
+      { item: "Exam 1 — Module 1 (Ch. 1–3)", weight: "15%" },
+      { item: "Exam 2 — Module 2 (Ch. 4–7)", weight: "20%" },
+      { item: "Exam 3 — Module 3 (Ch. 8–12), reviews Ch. 1–12", weight: "25%" },
     ],
     gradingScale: "A 90–92, A>92 | B 83–86, B+ 87–89 | C 73–76, C+ 77–79 | D 63–66, D+ 67–69 | F <60. Curve considered only if class avg < 75%.",
     keyDates: [
       { label: "Syllabus Quiz due", date: "Tue Sep 1" },
       { label: "Exam 1", date: "Wed Sep 17, 8:00–9:00 PM", detail: "WTHR 200" },
       { label: "Exam 2", date: "Tue Oct 27, 8:00–9:00 PM", detail: "WTHR 200" },
-      { label: "Exam 3 (comprehensive)", date: "Finals week (TBD)" },
+      { label: "Exam 3 (Ch. 8–12, comprehensive review)", date: "Finals week (TBD)" },
     ],
     attendance:
       "iClicker check-in worth 2 pts/class, max 64 pts. YOU must remember to open iClicker and hit 'Join' — no reminders. If iClicker fails, sign the sheet before leaving class or attendance can't be updated.",
@@ -117,6 +121,7 @@ export const CLASSES: ClassInfo[] = [
     instructor: {
       name: "Raleigh Heth",
       email: "rheth@purdue.edu",
+      office: "Beering 6165",
       officeHours: "Tues/Thurs 2–4 PM (email response 8 AM–5 PM Mon–Fri)",
     },
     meetingTimes: [{ days: "MWF", time: "10:30–11:20 AM", location: "BRNG 1242" }],
@@ -240,6 +245,8 @@ export const CLASSES: ClassInfo[] = [
     instructor: {
       name: "Cara Wetzel",
       email: "wetzelc@purdue.edu",
+      office: "Young Hall, 6th floor",
+      phone: "765-494-0843",
       officeHours: "By appointment — office on 6th floor of Young Hall",
     },
     meetingTimes: [{ days: "T/R", time: "10:30–11:20 AM", location: "UNIV 201" }],
@@ -295,6 +302,7 @@ export const CLASSES: ClassInfo[] = [
     instructor: {
       name: "Daniel Rubin",
       email: "rubin6@purdue.edu",
+      phone: "614-309-6576",
       officeHours: "Wednesdays 10:00 AM–12:00 PM or by appointment",
     },
     meetingTimes: [

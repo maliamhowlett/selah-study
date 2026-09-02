@@ -9,6 +9,7 @@ export const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/classes", label: "Classes" },
   { href: "/calendar", label: "Calendar" },
+  { href: "/syllabus", label: "Syllabus" },
   { href: "/record", label: "Record" },
   { href: "/notes", label: "Notes" },
   { href: "/study", label: "Study" },
