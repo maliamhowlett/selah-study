@@ -15,6 +15,19 @@ const SCOPES = [
 
 export const OAUTH_STATE_COOKIE = "selah_google_oauth_state";
 
+/** The one scope the site can't work without. */
+const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar";
+
+/**
+ * Google's consent screen lists each permission with its own checkbox, and
+ * clicking Continue without ticking the calendar one still returns a perfectly
+ * valid token — just one that can't touch a calendar. Catching it here turns a
+ * baffling failure on the next page load into a clear "tick the box" message.
+ */
+export function grantsCalendarAccess(scope?: string): boolean {
+  return (scope ?? "").split(" ").includes(CALENDAR_SCOPE);
+}
+
 export type GoogleConnection = {
   refreshToken: string;
   accessToken: string | null;
@@ -61,11 +74,30 @@ export function buildAuthUrl(redirectUri: string, state: string): string {
   return `${AUTH_ENDPOINT}?${params.toString()}`;
 }
 
+/**
+ * Thrown when Google refuses to mint a token. `needsReconnect` marks the case
+ * that actually matters day to day: the refresh token has expired or been
+ * revoked, which happens every 7 days while the app sits in Google's Testing
+ * mode. The only cure is sending the user back through consent, so this has to
+ * reach the UI as a reconnect prompt rather than a generic failure.
+ */
+export class GoogleAuthError extends Error {
+  constructor(
+    message: string,
+    readonly needsReconnect: boolean,
+  ) {
+    super(message);
+    this.name = "GoogleAuthError";
+  }
+}
+
 type TokenResponse = {
   access_token: string;
   expires_in: number;
   refresh_token?: string;
   id_token?: string;
+  /** Space-separated list of what the user actually agreed to. */
+  scope?: string;
 };
 
 async function postToken(body: Record<string, string>): Promise<TokenResponse> {
@@ -77,7 +109,15 @@ async function postToken(body: Record<string, string>): Promise<TokenResponse> {
 
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
-    throw new Error(`Google token request failed (${res.status}): ${detail}`);
+    // Google reports both an expired refresh token and a revoked one as
+    // invalid_grant; either way the stored token is dead.
+    const expired = detail.includes("invalid_grant");
+    throw new GoogleAuthError(
+      expired
+        ? "Your Google Calendar connection expired — reconnect to keep syncing."
+        : `Google token request failed (${res.status}): ${detail}`,
+      expired,
+    );
   }
   return (await res.json()) as TokenResponse;
 }

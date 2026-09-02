@@ -1,6 +1,6 @@
 "use client";
 
-import { CATEGORY_STYLES } from "@/lib/calendar/categories";
+import { chipClass, dotClass, markedTitle } from "@/lib/calendar/style";
 import type { CalendarEvent } from "@/lib/calendar/types";
 import {
   WEEKDAYS,
@@ -81,7 +81,6 @@ export default function MonthGrid({
               {/* Full chips from small screens up… */}
               <div className="hidden space-y-1 sm:block">
                 {dayEvents.slice(0, MAX_CHIPS).map((event) => {
-                  const style = CATEGORY_STYLES[event.category];
                   const time = formatTime(event);
                   return (
                     <button
@@ -89,13 +88,10 @@ export default function MonthGrid({
                       type="button"
                       onClick={() => onSelectEvent(event)}
                       title={time ? `${time} · ${event.title}` : event.title}
-                      className={`block w-full truncate rounded-md px-1.5 py-1 text-left text-[11px] leading-tight hover:opacity-85 ${style.chip}`}
+                      className={`block w-full truncate rounded-md px-1.5 py-1 text-left text-[11px] leading-tight hover:opacity-85 ${chipClass(event)}`}
                     >
-                      {event.category === "exam" && (
-                        <span className="mr-1 tracking-wider">▲</span>
-                      )}
-                      {time && <span className="mr-1 opacity-80">{time}</span>}
-                      {event.title}
+                      {time && <span className="mr-1 opacity-80 no-underline">{time}</span>}
+                      {markedTitle(event)}
                     </button>
                   );
                 })}
@@ -120,7 +116,7 @@ export default function MonthGrid({
                     aria-label={event.title}
                     className={`h-1.5 rounded-full ${
                       event.category === "exam" ? "w-4" : "w-1.5"
-                    } ${CATEGORY_STYLES[event.category].dot}`}
+                    } ${dotClass(event)}`}
                   />
                 ))}
               </div>

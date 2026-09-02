@@ -1,65 +1,87 @@
-// Event categories drive both the highlight styling on the site and the colour
-// Google shows the event in. The category is stored on the Google event itself
+// What *kind* of thing an event is. This is the emphasis axis of the calendar:
+// the colour already says which class an event belongs to (see courses.ts), so
+// the category layers weight, underline or a dashed outline on top of that
+// colour rather than replacing it. That way an ACCT exam still reads as ACCT.
+//
+// The category is stored on the Google event itself
 // (extendedProperties.private.selahCategory) so it survives edits made anywhere.
 
-export const CATEGORIES = ["exam", "assignment", "club", "class", "other"] as const;
+export const CATEGORIES = [
+  "exam",
+  "assignment",
+  "optional",
+  "club",
+  "class",
+  "other",
+] as const;
 
 export type Category = (typeof CATEGORIES)[number];
 
 export type CategoryStyle = {
   label: string;
-  /** Chip/pill styling used in the month grid. */
+  /** Extra classes layered onto the course colour in the month grid. */
   chip: string;
-  /** Left accent bar + background for the upcoming list. */
+  /** Extra classes layered onto the course colour in the upcoming list. */
   row: string;
-  /** Small uppercase badge. */
+  /** Small uppercase badge — this one keeps its own colour so the word reads. */
   badge: string;
-  /** Dot used where there's no room for a full chip. */
-  dot: string;
-  /** Google Calendar colorId, so events look right in Google too. */
-  googleColorId: string;
+  /** Prefix character shown before the title, or "" for none. */
+  marker: string;
+  /** How much this needs to jump out, used to sort a busy day. */
+  weight: number;
 };
 
 export const CATEGORY_STYLES: Record<Category, CategoryStyle> = {
   exam: {
     label: "Exam",
-    chip: "bg-exam text-white font-semibold",
-    row: "border-l-4 border-exam bg-exam-light",
+    // Solid underline plus a ring: the loudest treatment on the calendar.
+    chip: "font-bold underline decoration-2 underline-offset-[3px] ring-2 ring-exam/70",
+    row: "font-bold underline decoration-2 underline-offset-[3px] ring-2 ring-inset ring-exam/50",
     badge: "bg-exam text-white",
-    dot: "bg-exam",
-    googleColorId: "11", // Tomato
+    marker: "★ ",
+    weight: 0,
   },
   assignment: {
     label: "Due",
-    chip: "bg-assignment-light text-assignment font-medium",
-    row: "border-l-4 border-assignment bg-assignment-light",
+    // Dotted underline: clearly marked, one step quieter than an exam.
+    chip: "font-semibold underline decoration-dotted decoration-2 underline-offset-[3px]",
+    row: "font-semibold underline decoration-dotted decoration-2 underline-offset-[3px]",
     badge: "bg-assignment text-white",
-    dot: "bg-assignment",
-    googleColorId: "5", // Banana
+    marker: "",
+    weight: 1,
+  },
+  optional: {
+    label: "Optional",
+    // Dashed outline and lighter type: visibly a "could", not a "must".
+    chip: "border border-dashed border-current/50 italic opacity-90",
+    row: "border border-dashed border-current/40 italic opacity-90",
+    badge: "bg-success text-white",
+    marker: "✦ ",
+    weight: 2,
   },
   club: {
     label: "Club",
-    chip: "bg-club-light text-club font-medium",
-    row: "border-l-4 border-club bg-club-light",
+    chip: "",
+    row: "",
     badge: "bg-club text-white",
-    dot: "bg-club",
-    googleColorId: "1", // Lavender
+    marker: "",
+    weight: 3,
   },
   class: {
     label: "Class",
-    chip: "bg-surface-hover text-muted",
-    row: "border-l-4 border-border bg-surface-hover",
+    chip: "opacity-85",
+    row: "opacity-85",
     badge: "bg-muted text-white",
-    dot: "bg-muted",
-    googleColorId: "8", // Graphite
+    marker: "",
+    weight: 4,
   },
   other: {
     label: "Event",
-    chip: "bg-primary-light text-foreground",
-    row: "border-l-4 border-primary bg-primary-light",
+    chip: "",
+    row: "",
     badge: "bg-primary text-white",
-    dot: "bg-primary",
-    googleColorId: "4", // Flamingo
+    marker: "",
+    weight: 3,
   },
 };
 
@@ -67,29 +89,32 @@ export const CATEGORY_STYLES: Record<Category, CategoryStyle> = {
 export const CATEGORY_OPTIONS: { value: Category; label: string }[] = [
   { value: "exam", label: "Exam / quiz / test" },
   { value: "assignment", label: "Assignment due" },
+  { value: "optional", label: "Optional — extra credit, SI, review" },
   { value: "club", label: "Club or campus event" },
   { value: "class", label: "Class meeting" },
   { value: "other", label: "Other" },
 ];
 
-// Ordered most-specific first: an event called "Exam review session" should read
-// as an exam, but "Quiz 3 study group" should still land on exam too. Anything
-// genuinely ambiguous falls through to "other".
-const PATTERNS: [Category, RegExp][] = [
-  [
-    "exam",
-    /\b(exam|midterm|mid-term|final(s)?\b|quiz(z?es)?|test(s)?\b|assessment|proctor)/i,
-  ],
-  [
-    "assignment",
-    /\b(due|assignment|homework|hw\b|paper|essay|project|problem set|pset|submit|deadline|draft|report|lab report|discussion post|response)/i,
-  ],
-  [
-    "club",
-    /\b(club|callout|meeting|social|fair|mixer|rush|bible study|small group|worship|service|volunteer|fundraiser|game night|retreat|conference|workshop|info session|interest session)/i,
-  ],
-  ["class", /\b(lecture|lab\b|recitation|seminar|discussion section|office hours|class\b)/i],
-];
+// Category detection runs in a deliberate order, because real syllabus labels
+// mix vocabularies: "Midterm Reflection Paper" is an assignment, not an exam,
+// even though it contains the word "midterm".
+
+// Checked first so an optional exam-prep session doesn't read as an exam.
+const OPTIONAL =
+  /\b(extra credit|bonus|optional|supplemental instruction|si session|review session|study session|drop-in|office hours|tutoring|not required|if you want)\b/i;
+
+const SITTING = /\b(exam|quiz(z?es)?|test(s)?|assessment|proctor)\b/i;
+
+const COURSEWORK =
+  /\b(paper|essay|worksheet|reflection|activity|vision board|interview|response|draft|report|project|problem set|pset|homework|hw|assignment|smartbook|discussion post|due|deadline|submit)\b/i;
+
+const SCHEDULED = /\b(midterm|mid-term|final(s)?)\b/i;
+
+const CLUB =
+  /\b(club|callout|social|fair|mixer|rush|bible study|small group|worship|volunteer|fundraiser|game night|retreat|conference|workshop|info session|interest session)\b/i;
+
+const CLASS_TIME =
+  /\b(lecture|lab|recitation|seminar|discussion section|class|meeting)\b/i;
 
 export function isCategory(value: unknown): value is Category {
   return typeof value === "string" && (CATEGORIES as readonly string[]).includes(value);
@@ -101,8 +126,23 @@ export function isCategory(value: unknown): value is Category {
  */
 export function detectCategory(title: string, description?: string): Category {
   const haystack = `${title} ${description ?? ""}`;
-  for (const [category, pattern] of PATTERNS) {
-    if (pattern.test(haystack)) return category;
-  }
+
+  // Nothing optional should ever be shown as a hard requirement, so this wins
+  // over every other rule.
+  if (OPTIONAL.test(haystack)) return "optional";
+
+  // "Exam"/"quiz"/"test" are unambiguous — a sitting is a sitting.
+  if (SITTING.test(haystack)) return "exam";
+
+  // Checked before midterm/final so "Final Reflection Paper" reads as work due,
+  // not as an exam.
+  if (COURSEWORK.test(haystack)) return "assignment";
+
+  // "Last day of class (no final)" is a date to know, not an exam to sit.
+  if (SCHEDULED.test(haystack) && !/\bno\s+final\b/i.test(haystack)) return "exam";
+
+  if (CLUB.test(haystack)) return "club";
+  if (CLASS_TIME.test(haystack)) return "class";
+
   return "other";
 }

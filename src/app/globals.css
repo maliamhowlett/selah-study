@@ -25,6 +25,22 @@
   --assignment-light: #FAF2E1;
   --club: #8085BE;
   --club-light: #EEEFF9;
+
+  /* Per-course accents. Colour says which class an event belongs to; the
+     category on top of it says whether it's an exam, something due, or
+     optional. */
+  --course-acct: #B07D5B;
+  --course-acct-light: #F6EBE0;
+  --course-scla: #B0748B;
+  --course-scla-light: #FBEEF1;
+  --course-ma161: #6B8355;
+  --course-ma161-light: #EDF1E6;
+  --course-expl: #7B82C0;
+  --course-expl-light: #EDEEF9;
+  --course-ma170: #5A8B8B;
+  --course-ma170-light: #E4F0F0;
+  --course-none: #8F827A;
+  --course-none-light: #F7EFE7;
 }
 
 html {
@@ -55,6 +71,18 @@ html {
   --color-assignment-light: var(--assignment-light);
   --color-club: var(--club);
   --color-club-light: var(--club-light);
+  --color-course-acct: var(--course-acct);
+  --color-course-acct-light: var(--course-acct-light);
+  --color-course-scla: var(--course-scla);
+  --color-course-scla-light: var(--course-scla-light);
+  --color-course-ma161: var(--course-ma161);
+  --color-course-ma161-light: var(--course-ma161-light);
+  --color-course-expl: var(--course-expl);
+  --color-course-expl-light: var(--course-expl-light);
+  --color-course-ma170: var(--course-ma170);
+  --color-course-ma170-light: var(--course-ma170-light);
+  --color-course-none: var(--course-none);
+  --color-course-none-light: var(--course-none-light);
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
 }

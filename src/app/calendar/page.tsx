@@ -14,6 +14,10 @@ const ERRORS: Record<string, string> = {
   "bad-state": "That connection link expired or didn't match. Please start again from this page.",
   "no-refresh-token":
     "Google didn't hand over a lasting permission. Remove Selah Study at myaccount.google.com/permissions, then connect again.",
+  "no-calendar-scope":
+    "You signed in, but didn't grant calendar access — on Google's permissions " +
+    "screen, tick the box for seeing and editing your calendars, then continue. " +
+    "Nothing was saved, so just connect again.",
   "save-failed": "Your calendar connected, but saving it failed. Please try again.",
   "exchange-failed": "Google wouldn't complete the connection. Please try again.",
   "not-configured": "Google Calendar isn't set up on this site yet.",

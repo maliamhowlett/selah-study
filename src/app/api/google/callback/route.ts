@@ -4,6 +4,7 @@ import {
   emailFromIdToken,
   exchangeCodeForTokens,
   getRedirectUri,
+  grantsCalendarAccess,
   saveConnection,
 } from "@/lib/google/oauth";
 
@@ -35,6 +36,12 @@ export async function GET(request: NextRequest) {
     // the user has to revoke and reconnect.
     if (!tokens.refresh_token) {
       return back(request, "?error=no-refresh-token");
+    }
+
+    // Nothing is saved unless calendar access was actually granted — storing a
+    // sign-in-only token would look connected and fail on every request.
+    if (!grantsCalendarAccess(tokens.scope)) {
+      return back(request, "?error=no-calendar-scope");
     }
 
     const { error } = await saveConnection({

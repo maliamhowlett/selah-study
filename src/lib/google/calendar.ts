@@ -1,11 +1,15 @@
-import { detectCategory, isCategory, CATEGORY_STYLES } from "@/lib/calendar/categories";
-import type { CalendarEvent, EventInput } from "@/lib/calendar/types";
-import { getAccessToken } from "./oauth";
+import { detectCategory, isCategory } from "@/lib/calendar/categories";
+import { detectCourse, isCourse, COURSE_STYLES } from "@/lib/calendar/courses";
+import type { CalendarEvent, EventInput, RepeatRule } from "@/lib/calendar/types";
+import { GoogleAuthError, getAccessToken } from "./oauth";
 
 const API_BASE = "https://www.googleapis.com/calendar/v3";
 
 /** Key under extendedProperties.private where the chosen category is stored. */
 const CATEGORY_KEY = "selahCategory";
+
+/** Key under extendedProperties.private where the chosen class is stored. */
+const COURSE_KEY = "selahCourse";
 
 export class GoogleCalendarError extends Error {
   constructor(
@@ -28,8 +32,23 @@ type GoogleEvent = {
   start?: GoogleDate;
   end?: GoogleDate;
   htmlLink?: string;
+  recurringEventId?: string;
   extendedProperties?: { private?: Record<string, string> };
 };
+
+/**
+ * Turns a repeat rule into the single RRULE line Google wants, e.g.
+ * `RRULE:FREQ=WEEKLY;BYDAY=TU,TH;UNTIL=20261211T045959Z`. The UNTIL instant
+ * arrives already in UTC from the browser, so it only needs reformatting from
+ * ISO-with-separators into the compact iCalendar form.
+ */
+function toRRule(repeat: RepeatRule): string {
+  const until = new Date(repeat.until)
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
+  return `RRULE:FREQ=WEEKLY;BYDAY=${repeat.days.join(",")};UNTIL=${until}`;
+}
 
 /** Google's all-day `end.date` is exclusive; the site treats it as inclusive. */
 function shiftDate(dateString: string, days: number): string {
@@ -47,8 +66,10 @@ function toCalendarEvent(raw: GoogleEvent): CalendarEvent | null {
   const end = allDay ? shiftDate(rawEnd, -1) : rawEnd;
 
   const title = raw.summary?.trim() || "(no title)";
-  const stored = raw.extendedProperties?.private?.[CATEGORY_KEY];
+  const props = raw.extendedProperties?.private;
+  const stored = props?.[CATEGORY_KEY];
   const manual = isCategory(stored);
+  const storedCourse = props?.[COURSE_KEY];
 
   return {
     id: raw.id,
@@ -59,7 +80,11 @@ function toCalendarEvent(raw: GoogleEvent): CalendarEvent | null {
     end,
     allDay,
     category: manual ? stored : detectCategory(title, raw.description),
+    course: isCourse(storedCourse)
+      ? storedCourse
+      : detectCourse(title, raw.description),
     categorySource: manual ? "manual" : "detected",
+    seriesId: raw.recurringEventId,
     htmlLink: raw.htmlLink,
   };
 }
@@ -79,8 +104,13 @@ function toGoogleEvent(input: EventInput): Record<string, unknown> {
     location: input.location || undefined,
     start,
     end,
-    colorId: CATEGORY_STYLES[input.category].googleColorId,
-    extendedProperties: { private: { [CATEGORY_KEY]: input.category } },
+    // Colour by class, so Google's month view groups by course the way the
+            // site does; the exam/due emphasis lives on the site.
+    colorId: COURSE_STYLES[input.course].googleColorId,
+    extendedProperties: {
+      private: { [CATEGORY_KEY]: input.category, [COURSE_KEY]: input.course },
+    },
+    ...(input.repeat ? { recurrence: [toRRule(input.repeat)] } : {}),
   };
 }
 
@@ -88,7 +118,17 @@ async function callGoogle(
   path: string,
   init: RequestInit = {},
 ): Promise<Response> {
-  const auth = await getAccessToken();
+  let auth: Awaited<ReturnType<typeof getAccessToken>>;
+  try {
+    auth = await getAccessToken();
+  } catch (err) {
+    // A dead refresh token is an auth problem, not a mystery — surface it as a
+    // 401 so the page offers the reconnect link instead of "Something went wrong".
+    if (err instanceof GoogleAuthError && err.needsReconnect) {
+      throw new GoogleCalendarError(err.message, 401);
+    }
+    throw err;
+  }
   if (!auth) throw new GoogleCalendarError("Google Calendar is not connected.", 401);
 
   const url = path.replace("{calendarId}", encodeURIComponent(auth.calendarId));
@@ -157,7 +197,9 @@ export async function updateEvent(
 ): Promise<CalendarEvent> {
   const res = await callGoogle(
     `/calendars/{calendarId}/events/${encodeURIComponent(eventId)}`,
-    { method: "PATCH", body: JSON.stringify(toGoogleEvent(input)) },
+    // The id here is a single expanded occurrence, so this edits just that
+    // one; passing a recurrence would try to rewrite the whole series.
+    { method: "PATCH", body: JSON.stringify(toGoogleEvent({ ...input, repeat: undefined })) },
   );
   const event = toCalendarEvent((await res.json()) as GoogleEvent);
   if (!event) throw new GoogleCalendarError("Google returned an unreadable event.", 502);

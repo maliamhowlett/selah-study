@@ -7,7 +7,10 @@ import {
   detectCategory,
 } from "@/lib/calendar/categories";
 import type { Category } from "@/lib/calendar/categories";
-import type { CalendarEvent, EventInput } from "@/lib/calendar/types";
+import { COURSE_OPTIONS, COURSE_STYLES, detectCourse } from "@/lib/calendar/courses";
+import type { CourseKey } from "@/lib/calendar/courses";
+import { RRULE_DAYS } from "@/lib/calendar/types";
+import type { CalendarEvent, EventInput, RRuleDay } from "@/lib/calendar/types";
 import { toLocalInputValue } from "@/lib/calendar/dates";
 
 export type FormMode =
@@ -41,6 +44,39 @@ function splitDay(value: string): string {
   return value.slice(0, 10);
 }
 
+/** Day pills, in the order a week is read. */
+const DAY_PILLS: { value: RRuleDay; label: string }[] = [
+  { value: "SU", label: "S" },
+  { value: "MO", label: "M" },
+  { value: "TU", label: "T" },
+  { value: "WE", label: "W" },
+  { value: "TH", label: "T" },
+  { value: "FR", label: "F" },
+  { value: "SA", label: "S" },
+];
+
+/** JS getDay() order, so index 0 is Sunday. */
+const DAY_BY_INDEX: RRuleDay[] = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+
+/**
+ * Where a semester started in August–December ends around mid-December, and a
+ * spring one around the start of May. Only a starting guess — the field is
+ * editable.
+ */
+function semesterEnd(startValue: string): string {
+  const [year, month] = startValue.split("-").map(Number);
+  if (!year || !month) return "";
+  return month >= 8 ? `${year}-12-11` : `${year}-05-01`;
+}
+
+/** The RRULE UNTIL instant: the end of the chosen last day, in this browser's
+ * timezone, converted to UTC. Doing it here rather than on the server keeps the
+ * cut-off correct no matter where the site is deployed. */
+function untilInstant(day: string): string {
+  const [y, m, d] = day.split("-").map(Number);
+  return new Date(y, m - 1, d, 23, 59, 59).toISOString();
+}
+
 export default function EventForm({
   state,
   onClose,
@@ -52,6 +88,7 @@ export default function EventForm({
 
   const [title, setTitle] = useState(editing?.title ?? "");
   const [category, setCategory] = useState<Category>(editing?.category ?? "other");
+  const [course, setCourse] = useState<CourseKey>(editing?.course ?? "none");
   const [allDay, setAllDay] = useState(editing?.allDay ?? false);
   const [start, setStart] = useState(
     editing
@@ -67,6 +104,9 @@ export default function EventForm({
         : toLocalInputValue(new Date(editing.end))
       : joinDateTime(defaultDay, "10:00"),
   );
+  const [repeats, setRepeats] = useState(false);
+  const [repeatDays, setRepeatDays] = useState<RRuleDay[]>([]);
+  const [repeatUntil, setRepeatUntil] = useState(() => semesterEnd(defaultDay));
   const [location, setLocation] = useState(editing?.location ?? "");
   const [description, setDescription] = useState(editing?.description ?? "");
 
@@ -81,6 +121,8 @@ export default function EventForm({
   const [categoryTouched, setCategoryTouched] = useState(
     editing?.categorySource === "manual",
   );
+  // The class is guessed the same way, and likewise stops once chosen by hand.
+  const [courseTouched, setCourseTouched] = useState(Boolean(editing));
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -100,6 +142,26 @@ export default function EventForm({
     if (!categoryTouched) {
       setCategory(detectCategory(value, description));
     }
+    if (!courseTouched) {
+      setCourse(detectCourse(value, description));
+    }
+  };
+
+  const toggleRepeats = (next: boolean) => {
+    setRepeats(next);
+    if (next && repeatDays.length === 0) {
+      const [y, m, d] = splitDay(start).split("-").map(Number);
+      setRepeatDays([DAY_BY_INDEX[new Date(y, m - 1, d).getDay()]]);
+    }
+    if (next && !repeatUntil) setRepeatUntil(semesterEnd(splitDay(start)));
+  };
+
+  const toggleRepeatDay = (day: RRuleDay) => {
+    setRepeatDays((current) =>
+      current.includes(day)
+        ? current.filter((d) => d !== day)
+        : RRULE_DAYS.filter((d) => d === day || current.includes(d)),
+    );
   };
 
   const toggleAllDay = (nextAllDay: boolean) => {
@@ -119,6 +181,8 @@ export default function EventForm({
     setError("");
     setSaving(true);
 
+    const useRepeat = !editing && repeats && repeatDays.length > 0 && repeatUntil;
+
     const message = await onSave(
       {
         title: title.trim(),
@@ -128,6 +192,10 @@ export default function EventForm({
         end: end || start,
         allDay,
         category,
+        course,
+        repeat: useRepeat
+          ? { days: repeatDays, until: untilInstant(repeatUntil) }
+          : undefined,
       },
       editing?.id,
     );
@@ -152,6 +220,7 @@ export default function EventForm({
   };
 
   const style = CATEGORY_STYLES[category];
+  const courseStyle = COURSE_STYLES[course];
 
   return (
     <div
@@ -202,6 +271,36 @@ export default function EventForm({
             placeholder="ACCT Exam 1"
             className={`${inputClass} mb-5`}
           />
+
+          <div className="mb-5">
+            <label className={labelClass} htmlFor="event-course">
+              Which class
+            </label>
+            <div className="flex items-center gap-3">
+              <select
+                id="event-course"
+                value={course}
+                onChange={(e) => {
+                  setCourseTouched(true);
+                  setCourse(e.target.value as CourseKey);
+                }}
+                className={inputClass}
+              >
+                {COURSE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <span
+                className={`h-4 w-4 shrink-0 rounded-full ${courseStyle.accent}`}
+                aria-hidden="true"
+              />
+            </div>
+            <p className="mt-1.5 text-xs text-muted">
+              This sets the event&apos;s colour, here and in Google Calendar.
+            </p>
+          </div>
 
           <div className="mb-5">
             <label className={labelClass} htmlFor="event-category">
@@ -278,6 +377,74 @@ export default function EventForm({
               />
             </div>
           </div>
+
+          {!editing && (
+            <div className="mb-5">
+              <label className="mb-3 flex cursor-pointer items-center gap-2.5 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  checked={repeats}
+                  onChange={(e) => toggleRepeats(e.target.checked)}
+                  className="h-4 w-4 accent-[var(--primary)]"
+                />
+                Repeats every week
+              </label>
+
+              {repeats && (
+                <div className="rounded-2xl border border-border bg-background/60 p-4">
+                  <span className={labelClass}>On these days</span>
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {DAY_PILLS.map((day, index) => {
+                      const selected = repeatDays.includes(day.value);
+                      return (
+                        <button
+                          key={day.value}
+                          type="button"
+                          onClick={() => toggleRepeatDay(day.value)}
+                          aria-pressed={selected}
+                          aria-label={
+                            ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][index]
+                          }
+                          className={`h-9 w-9 rounded-full border text-sm transition ${
+                            selected
+                              ? "border-transparent gradient-primary text-white shadow-sm"
+                              : "border-border text-muted hover:bg-surface-hover hover:text-foreground"
+                          }`}
+                        >
+                          {day.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <label className={labelClass} htmlFor="event-repeat-until">
+                    Until
+                  </label>
+                  <input
+                    id="event-repeat-until"
+                    type="date"
+                    value={repeatUntil}
+                    min={splitDay(start)}
+                    onChange={(e) => setRepeatUntil(e.target.value)}
+                    className={inputClass}
+                  />
+                  <p className="mt-2 text-xs text-muted">
+                    {repeatDays.length === 0
+                      ? "Pick at least one day, or untick the box to keep this a one-off."
+                      : "Each week lands on your calendar separately, so you can move or delete a single one later."}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {editing?.seriesId && (
+            <p className="mb-5 rounded-2xl border border-border bg-background/60 p-3 text-xs text-muted">
+              This is one week of a repeating event — saving or deleting here
+              changes only this occurrence. Edit the series in Google Calendar to
+              change them all.
+            </p>
+          )}
 
           <label className={labelClass} htmlFor="event-location">
             Where <span className="normal-case tracking-normal">(optional)</span>

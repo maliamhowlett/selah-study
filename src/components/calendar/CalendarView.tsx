@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CATEGORIES, CATEGORY_STYLES } from "@/lib/calendar/categories";
 import type { Category } from "@/lib/calendar/categories";
+import { COURSES, COURSE_STYLES } from "@/lib/calendar/courses";
+import type { CourseKey } from "@/lib/calendar/courses";
 import type { CalendarEvent, EventInput } from "@/lib/calendar/types";
 import {
   addDays,
@@ -12,6 +14,7 @@ import {
   monthLabel,
 } from "@/lib/calendar/dates";
 import EventForm, { type FormMode } from "./EventForm";
+import ImportPanel from "./ImportPanel";
 import MonthGrid from "./MonthGrid";
 import UpcomingList from "./UpcomingList";
 
@@ -34,6 +37,7 @@ export default function CalendarView({ googleEmail }: CalendarViewProps) {
   const [needsReconnect, setNeedsReconnect] = useState(false);
   const [form, setForm] = useState<FormMode | null>(null);
   const [hidden, setHidden] = useState<Set<Category>>(new Set());
+  const [hiddenCourses, setHiddenCourses] = useState<Set<CourseKey>>(new Set());
   const [disconnecting, setDisconnecting] = useState(false);
 
   const loadEvents = useCallback(async () => {
@@ -73,8 +77,13 @@ export default function CalendarView({ googleEmail }: CalendarViewProps) {
   }, [loadEvents]);
 
   const visibleEvents = useMemo(
-    () => events.filter((event) => !hidden.has(event.category)),
-    [events, hidden],
+    () =>
+      events.filter(
+        (event) =>
+          !hidden.has(event.category) &&
+          !hiddenCourses.has(event.course ?? "none"),
+      ),
+    [events, hidden, hiddenCourses],
   );
 
   const eventsByDay = useMemo(() => groupEventsByDay(visibleEvents), [visibleEvents]);
@@ -85,6 +94,15 @@ export default function CalendarView({ googleEmail }: CalendarViewProps) {
       const next = new Set(prev);
       if (next.has(category)) next.delete(category);
       else next.add(category);
+      return next;
+    });
+  };
+
+  const toggleCourse = (course: CourseKey) => {
+    setHiddenCourses((prev) => {
+      const next = new Set(prev);
+      if (next.has(course)) next.delete(course);
+      else next.add(course);
       return next;
     });
   };
@@ -210,8 +228,43 @@ export default function CalendarView({ googleEmail }: CalendarViewProps) {
           )}
         </div>
 
-        {/* Category filters double as the colour legend. */}
+      </div>
+
+      {/* Two legends, because the calendar reads on two axes: the colour says
+          which class, the treatment on top of it says how urgent. Both double
+          as filters. */}
+      <div className="mb-4 space-y-2">
         <div className="flex flex-wrap items-center gap-1.5">
+          <span className="mr-1 text-[10px] uppercase tracking-[0.2em] text-muted">
+            Class
+          </span>
+          {COURSES.map((course) => {
+            const style = COURSE_STYLES[course];
+            const off = hiddenCourses.has(course);
+            return (
+              <button
+                key={course}
+                type="button"
+                onClick={() => toggleCourse(course)}
+                aria-pressed={!off}
+                title={off ? `Show ${style.code}` : `Hide ${style.code}`}
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-opacity ${
+                  off
+                    ? "border-border text-muted opacity-50"
+                    : "border-border text-foreground"
+                }`}
+              >
+                <span className={`h-2.5 w-2.5 rounded-full ${style.accent}`} />
+                {style.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="mr-1 text-[10px] uppercase tracking-[0.2em] text-muted">
+            Kind
+          </span>
           {CATEGORIES.map((category) => {
             const style = CATEGORY_STYLES[category];
             const off = hidden.has(category);
@@ -222,14 +275,18 @@ export default function CalendarView({ googleEmail }: CalendarViewProps) {
                 onClick={() => toggleCategory(category)}
                 aria-pressed={!off}
                 title={off ? `Show ${style.label} events` : `Hide ${style.label} events`}
-                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-opacity ${
+                className={`rounded-full border px-3 py-1.5 text-xs transition-opacity ${
                   off
                     ? "border-border text-muted opacity-50"
                     : "border-border text-foreground"
                 }`}
               >
-                <span className={`h-2 w-2 rounded-full ${style.dot}`} />
-                {style.label}
+                {/* Each label wears its own treatment, so the legend shows
+                    exactly what to look for in the grid. */}
+                <span className={style.chip.replace(/ring-\S+/g, "")}>
+                  {style.marker}
+                  {style.label}
+                </span>
               </button>
             );
           })}
@@ -244,6 +301,10 @@ export default function CalendarView({ googleEmail }: CalendarViewProps) {
           onAddOnDay={(day) => setForm({ mode: "create", day })}
           onSelectEvent={(event) => setForm({ mode: "edit", event })}
         />
+      </div>
+
+      <div className="mt-8">
+        <ImportPanel onImported={loadEvents} />
       </div>
 
       <div className="mt-8">

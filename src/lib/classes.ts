@@ -119,7 +119,7 @@ export const CLASSES: ClassInfo[] = [
       email: "rheth@purdue.edu",
       officeHours: "Tues/Thurs 2–4 PM (email response 8 AM–5 PM Mon–Fri)",
     },
-    meetingTimes: [{ days: "MWF", time: "10:30 AM", location: "BRNG 1242" }],
+    meetingTimes: [{ days: "MWF", time: "10:30–11:20 AM", location: "BRNG 1242" }],
     overview:
       "Foundational reading, writing, speaking, and analytical skills through transformative texts from antiquity to the birth of the modern era. Writing-intensive: at least 8,000 words of polished writing.",
     learningOutcomes: [
@@ -179,7 +179,12 @@ export const CLASSES: ClassInfo[] = [
     ],
     meetingTimes: [
       { days: "MWF", time: "3:30–4:20 PM", location: "CL50 224", note: "Lecture — Section 100" },
-      { days: "T/R", time: "7:30 AM", location: "TBD", note: "Recitation with TA (quizzes here!)" },
+      {
+        days: "T/R",
+        time: "7:30–8:20 AM",
+        location: "HAMP 2123",
+        note: "Recitation with K. P. Ashmallah (quizzes here!)",
+      },
     ],
     overview:
       "Introduction to differential and integral calculus of one variable, with applications. 5 credits.",
@@ -221,7 +226,8 @@ export const CLASSES: ClassInfo[] = [
       "HW: Fri+Mon lectures → due Tue 11:59 PM. Wed lecture → due Thu 11:59 PM.",
       "Quiz nearly every Tue/Thu recitation (except a few).",
       "If you switch recitation sections, tell your TA so scores transfer.",
-      "SI available — see purdue.edu/si.",
+      "SI with Shin S.: Sun 5:30–6:20 PM (BRNG 1222), Wed & Thu 5:30–6:20 PM (SCHM 108). Office hours Thu 1:30–2:30 PM.",
+      "SI with Josh K.: Mon, Tue & Thu 7:30–8:20 PM (WALC 2121).",
     ],
   },
   {
@@ -236,7 +242,7 @@ export const CLASSES: ClassInfo[] = [
       email: "wetzelc@purdue.edu",
       officeHours: "By appointment — office on 6th floor of Young Hall",
     },
-    meetingTimes: [{ days: "T/R", time: "10:30 AM", location: "UNIV 201" }],
+    meetingTimes: [{ days: "T/R", time: "10:30–11:20 AM", location: "UNIV 201" }],
     overview:
       "Builds understanding of career interests and personality traits related to academic/career decisions. Introduces Purdue programs, the world of work, and decision-making strategies.",
     learningOutcomes: [
@@ -292,9 +298,13 @@ export const CLASSES: ClassInfo[] = [
       officeHours: "Wednesdays 10:00 AM–12:00 PM or by appointment",
     },
     meetingTimes: [
-      { days: "Tue", time: "3:30 PM", location: "WALC 1055", note: "Main lecture" },
-      { days: "Thu (lecture)", time: "3:30 PM", location: "MATH 175" },
-      { days: "Thu (lab)", time: "3:30 PM", location: "Assigned lab room w/ TA" },
+      { days: "Tue", time: "3:30–4:20 PM", location: "WALC 1055", note: "Main lecture" },
+      {
+        days: "Thu",
+        time: "3:30–4:20 PM",
+        location: "MATH 175 (lecture) / assigned lab room (lab)",
+        note: "Lecture some weeks, lab others — check which before you go",
+      },
     ],
     overview:
       "Introduction to actuarial science from practicing actuaries (life, casualty, consulting). Covers insurance, mathematical theory of interest, and Excel applications. Guest speakers throughout.",

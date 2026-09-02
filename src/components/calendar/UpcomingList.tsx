@@ -1,6 +1,8 @@
 "use client";
 
 import { CATEGORY_STYLES } from "@/lib/calendar/categories";
+import { COURSE_STYLES } from "@/lib/calendar/courses";
+import { markedTitle, rowClass } from "@/lib/calendar/style";
 import type { CalendarEvent } from "@/lib/calendar/types";
 import {
   countdownLabel,
@@ -22,6 +24,7 @@ function Row({
   onSelect: (event: CalendarEvent) => void;
 }) {
   const style = CATEGORY_STYLES[event.category];
+  const course = COURSE_STYLES[event.course ?? "none"];
   const start = parseEventDate(event.start);
   const time = formatTime(event);
 
@@ -29,7 +32,7 @@ function Row({
     <button
       type="button"
       onClick={() => onSelect(event)}
-      className={`flex w-full items-start gap-3 rounded-r-xl px-4 py-3 text-left transition-colors hover:brightness-[0.98] ${style.row}`}
+      className={`flex w-full items-start gap-3 rounded-r-xl px-4 py-3 text-left transition-colors hover:brightness-[0.98] ${rowClass(event)}`}
     >
       <span
         className={`mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-[9px] uppercase tracking-wider ${style.badge}`}
@@ -37,14 +40,9 @@ function Row({
         {style.label}
       </span>
       <span className="min-w-0 flex-1">
-        <span
-          className={`block truncate ${
-            event.category === "exam" ? "font-semibold text-foreground" : "text-foreground"
-          }`}
-        >
-          {event.title}
-        </span>
-        <span className="mt-0.5 block text-xs text-muted">
+        <span className="block truncate">{markedTitle(event)}</span>
+        <span className="mt-0.5 block text-xs text-muted no-underline">
+          {event.course && event.course !== "none" && `${course.label} · `}
           {formatShortDate(start)}
           {time && ` · ${time}`}
           {event.location && ` · ${event.location}`}
