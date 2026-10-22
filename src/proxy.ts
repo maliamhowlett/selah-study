@@ -25,8 +25,18 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  // Refresh session if it exists
-  await supabase.auth.getUser();
+  // Refresh the session if there is one. This runs on every request, so it
+  // must not be able to take the site down: when Supabase is unreachable — a
+  // paused free-tier project stops resolving in DNS entirely — this throws,
+  // and an unhandled throw here 500s every page for anyone holding a session
+  // cookie, while anonymous visitors never trigger the network call and see a
+  // working site. Failing open means the worst case is being treated as
+  // signed out, which is what an unreachable auth server means anyway.
+  try {
+    await supabase.auth.getUser();
+  } catch (error) {
+    console.error("Session refresh failed; continuing as signed out:", error);
+  }
 
   return response;
 }
