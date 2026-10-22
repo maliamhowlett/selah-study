@@ -15,12 +15,27 @@ import { useStoredValue, writeStoredValue } from "@/lib/study/local-store";
 type Result = "got" | "missed";
 type Kind = "journal" | "classification";
 
+/** What was stored per drill. The verdict matters as much as the result:
+ * "close" means the accounts were right and the posting wasn't, which is a
+ * different problem from not knowing the accounts at all. */
+interface Record_ {
+  result: Result;
+  verdict?: string;
+}
+
 const STORE_KEY = "selah:drills:acct-20000";
 const BLANK: SubmittedLine = { account: "", debit: "", credit: "" };
 
-function parseResults(raw: string | null): Record<string, Result> {
+function parseResults(raw: string | null): Record<string, Record_> {
   try {
-    return raw ? (JSON.parse(raw) as Record<string, Result>) : {};
+    const parsed = raw ? (JSON.parse(raw) as Record<string, Result | Record_>) : {};
+    // Earlier versions stored a bare "got"/"missed" string.
+    return Object.fromEntries(
+      Object.entries(parsed).map(([k, v]) => [
+        k,
+        typeof v === "string" ? { result: v } : v,
+      ]),
+    );
   } catch {
     return {};
   }
@@ -99,20 +114,20 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
 
   const deck = useMemo(() => {
     if (kind === "classification") {
-      return CLASSIFICATION_DRILLS.filter((d) => !missedOnly || results[d.id] === "missed");
+      return CLASSIFICATION_DRILLS.filter((d) => !missedOnly || results[d.id]?.result === "missed");
     }
     return JOURNAL_DRILLS.filter(
       (d) =>
         (chapter === "all" || d.chapter === chapter) &&
-        (!missedOnly || results[d.id] === "missed"),
+        (!missedOnly || results[d.id]?.result === "missed"),
     );
   }, [kind, chapter, missedOnly, results]);
 
   const safeIndex = deck.length === 0 ? 0 : Math.min(index, deck.length - 1);
   const current = deck[safeIndex];
 
-  const missedCount = Object.values(results).filter((r) => r === "missed").length;
-  const gotCount = Object.values(results).filter((r) => r === "got").length;
+  const missedCount = Object.values(results).filter((r) => r.result === "missed").length;
+  const gotCount = Object.values(results).filter((r) => r.result === "got").length;
 
   /** Where the misses are concentrated, so a weak chapter is visible as one. */
   const weakSpots = useMemo(() => {
@@ -122,7 +137,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
       if (!result) continue;
       const row = byChapter.get(drill.chapter) ?? { missed: 0, total: 0 };
       row.total += 1;
-      if (result === "missed") row.missed += 1;
+      if (result.result === "missed") row.missed += 1;
       byChapter.set(drill.chapter, row);
     }
     return [...byChapter.entries()]
@@ -130,10 +145,10 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
       .sort((a, b) => b[1].missed / b[1].total - a[1].missed / a[1].total);
   }, [results]);
 
-  const record = (id: string, result: Result) => {
+  const record = (id: string, result: Result, verdict?: string) => {
     // Only the first attempt counts, so a second look can't launder a miss.
     if (results[id]) return;
-    writeStoredValue(STORE_KEY, JSON.stringify({ ...results, [id]: result }));
+    writeStoredValue(STORE_KEY, JSON.stringify({ ...results, [id]: { result, verdict } }));
   };
 
   const resetAttempt = () => {
@@ -162,7 +177,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     const result = gradeEntry(drill.entry, rows);
     setGrade(result);
     if (result.verdict !== "empty") {
-      record(drill.id, result.verdict === "correct" ? "got" : "missed");
+      record(drill.id, result.verdict === "correct" ? "got" : "missed", result.verdict);
     }
   };
 
@@ -171,7 +186,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     setChecked(true);
     const right =
       pickStatement === drill.statement && pickBalance === drill.normalBalance;
-    record(drill.id, right ? "got" : "missed");
+    record(drill.id, right ? "got" : "missed", right ? "correct" : "wrong");
   };
 
   const copyResults = async () => {
@@ -184,7 +199,13 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
       if (done.length === 0) continue;
       lines.push(`${label}:`);
       for (const d of done) {
-        const mark = results[d.id] === "got" ? "correct" : "MISSED";
+        const stored = results[d.id];
+        const mark =
+          stored.result === "got"
+            ? "correct"
+            : stored.verdict === "close"
+              ? "MISSED (right accounts, wrong posting)"
+              : "MISSED (wrong accounts / blank)";
         lines.push(`  [${mark}] ${d.chapter ?? ""} ${d.prompt ?? d.account ?? d.id}`.slice(0, 140));
       }
       lines.push("");
