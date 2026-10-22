@@ -45,6 +45,8 @@ export default async function CourseStudyPage({
   const weekday = campusWeekday();
   // The drill bank and the practice exam are ACCT-specific so far.
   const hasDrills = slug === "acct-20000";
+  const blueprintFor = (chapter: string) =>
+    plan?.blueprint?.find((b) => b.chapter === chapter);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
@@ -182,13 +184,51 @@ export default async function CourseStudyPage({
                     <h3 className="text-lg text-foreground">
                       <span className={course.text}>{topic.chapter}</span> {topic.title}
                     </h3>
-                    {topic.emphasis === "high" && (
-                      <span className="rounded-full bg-exam px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-white">
-                        Highest yield
+                    {blueprintFor(topic.chapter) && (
+                      <span
+                        className={`rounded-full border px-2.5 py-0.5 text-[10px] uppercase tracking-wider ${course.border} ${course.text}`}
+                      >
+                        {blueprintFor(topic.chapter)!.rows.reduce(
+                          (n, r) => n + r.questions,
+                          0,
+                        )}{" "}
+                        questions
                       </span>
                     )}
                   </div>
                   <p className="mb-4 text-sm text-muted">{topic.because}</p>
+
+                  {blueprintFor(topic.chapter) && (
+                    <>
+                      <p className={labelClass}>
+                        What Dr. Bokrand says is on it
+                      </p>
+                      <div className="mb-4 overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <tbody>
+                            {blueprintFor(topic.chapter)!.rows.map((row) => (
+                              <tr
+                                key={row.topic}
+                                className="border-b border-border/50 last:border-0"
+                              >
+                                <td className="py-2 pr-3 align-baseline">
+                                  <span className="text-foreground">{row.topic}</span>
+                                  {row.gap && (
+                                    <span className="mt-1 block border-l-2 border-exam bg-exam-light px-3 py-1.5 text-xs leading-relaxed">
+                                      {row.gap}
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="w-10 py-2 text-right align-baseline tabular-nums text-muted">
+                                  {row.questions}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  )}
 
                   <p className={labelClass}>Must know</p>
                   <ul className="mb-4 flex flex-col gap-1.5">

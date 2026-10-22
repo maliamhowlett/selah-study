@@ -291,6 +291,43 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
     note: "Book value $12,000 against $9,000 received — a $3,000 loss. Clear out the accumulated depreciation.",
   },
   {
+    id: "d-capitalize-engine",
+    chapter: "Ch. 7",
+    prompt:
+      "Pay $18,000 cash to replace the engine in a delivery truck, extending its useful life by three years.",
+    entry: [
+      { account: "Equipment", debit: 18000 },
+      { account: "Cash", credit: 18000 },
+    ],
+    note:
+      "Extends useful life, so it is capitalised into the asset — not Repairs and Maintenance Expense. Two marks on the blueprint ride on this distinction.",
+  },
+  {
+    id: "d-lump-sum",
+    chapter: "Ch. 7",
+    prompt:
+      "Pay $300,000 cash for land and a building together. Appraisals value the land at $120,000 and the building at $280,000.",
+    entry: [
+      { account: "Land", debit: 90000 },
+      { account: "Building", debit: 210000 },
+      { account: "Cash", credit: 300000 },
+    ],
+    note:
+      "Appraisals total $400,000. Land is 120/400 = 30% → $90,000; building 280/400 = 70% → $210,000. Split by RELATIVE fair value, never by the appraisal figures themselves.",
+  },
+  {
+    id: "d-aging-adjust",
+    chapter: "Ch. 5",
+    prompt:
+      "An aging schedule puts the required allowance at $16,400. The Allowance for Uncollectible Accounts currently has a $2,000 credit balance. Record the adjustment.",
+    entry: [
+      { account: "Bad Debt Expense", debit: 14400 },
+      { account: "Allowance for Uncollectible Accounts", credit: 14400 },
+    ],
+    note:
+      "Aging gives the required ENDING balance. The expense is whatever closes the gap: 16,400 − 2,000.",
+  },
+  {
     id: "d-repairs",
     chapter: "Ch. 7",
     prompt: "Pay $1,200 cash for routine maintenance on a delivery truck.",
@@ -450,6 +487,29 @@ export const CLASSIFICATION_DRILLS: ClassificationDrill[] = [
     section: "Operating expense",
     normalBalance: "Debit",
     note: "Easy to confuse with Accumulated Depreciation, which is the balance sheet contra account.",
+  },
+  {
+    id: "c-cash-equivalents",
+    account: "Cash Equivalents",
+    statement: "Balance sheet",
+    section: "Current assets — combined with cash as 'Cash and cash equivalents'",
+    normalBalance: "Debit",
+    note: "Investments maturing in three months or less. Cash also drives the statement of cash flows — the blueprint has a question on where cash is reported.",
+  },
+  {
+    id: "c-sales-returns",
+    account: "Sales Returns and Allowances",
+    statement: "Income statement",
+    section: "Contra-revenue — deducted to give net sales",
+    normalBalance: "Debit",
+  },
+  {
+    id: "c-gain-sale",
+    account: "Gain on Sale of Equipment",
+    statement: "Income statement",
+    section: "Other revenue, below operating income",
+    normalBalance: "Credit",
+    note: "Below operating income, so it does not change operating income — a favourite trap on multi-step income statement questions.",
   },
   {
     id: "c-loss-sale",

@@ -27,6 +27,22 @@ export interface StudyTopic {
   traps: string[];
 }
 
+/** One line of the instructor's own exam blueprint. */
+export interface BlueprintRow {
+  /** Learning objective number, blank when a row continues the one above. */
+  lo: string;
+  topic: string;
+  questions: number;
+  /** Set when the practice paper has nothing resembling this row. */
+  gap?: string;
+}
+
+export interface BlueprintChapter {
+  chapter: string;
+  title: string;
+  rows: BlueprintRow[];
+}
+
 export interface StudyDay {
   /** YYYY-MM-DD, so the page can tell which day you're on. */
   date: string;
@@ -47,6 +63,8 @@ export interface ExamPlan {
   weight: string;
   /** Opening read on where you stand, and what it implies for this exam. */
   situation: string[];
+  /** The instructor's published question counts, where there are any. */
+  blueprint?: BlueprintChapter[];
   topics: StudyTopic[];
   days: StudyDay[];
   problems: PracticeProblem[];
@@ -71,6 +89,92 @@ export interface CourseStudy {
 // ACCT 20000 — Exam 2
 // ---------------------------------------------------------------------------
 
+const ACCT_BLUEPRINT: BlueprintChapter[] = [
+  {
+    chapter: "Ch. 4",
+    title: "Cash and Internal Controls",
+    rows: [
+      {
+        lo: "1",
+        topic: "Role of corporate executives regarding the financial statements",
+        questions: 1,
+        gap: "Nothing like this on the practice paper. Your note says it: their role is to certify the financial statements.",
+      },
+      { lo: "2", topic: "Definitions and components of internal control", questions: 3 },
+      { lo: "3", topic: "Accounting treatment of different forms of customer payment", questions: 1 },
+      { lo: "4", topic: "Controls over cash receipts", questions: 1 },
+      { lo: "5", topic: "Reconcile the bank side and book side of the cash balance", questions: 2 },
+      { lo: "6", topic: "Record petty cash expenditures", questions: 1 },
+      {
+        lo: "8",
+        topic: "Reporting cash in the financial statements",
+        questions: 1,
+        gap: "Not on the practice paper. Your note: balance sheet, and statement of cash flows.",
+      },
+    ],
+  },
+  {
+    chapter: "Ch. 5",
+    title: "Receivables and Revenues",
+    rows: [
+      { lo: "1", topic: "Record credit sales with and without sales discounts", questions: 2 },
+      { lo: "2", topic: "Record customer returns", questions: 1 },
+      { lo: "", topic: "Determine net revenues", questions: 1 },
+      { lo: "3", topic: "Account characteristics of the Allowance for Uncollectible Accounts", questions: 1 },
+      { lo: "", topic: "Determine net accounts receivable", questions: 1 },
+      { lo: "4", topic: "Effect of bad debt write-offs on the accounting equation", questions: 1 },
+      { lo: "5", topic: "Calculate bad debt expense with given allowance information", questions: 1 },
+      {
+        lo: "",
+        topic: "Calculate bad debt expense using the aging method",
+        questions: 1,
+        gap: "The practice paper never asks this, and it is the hardest thing in the chapter. Work Example 7 and Activity 2 from the review packet.",
+      },
+      { lo: "7", topic: "Compute notes receivable interest revenue", questions: 1 },
+    ],
+  },
+  {
+    chapter: "Ch. 6",
+    title: "Inventory and Cost of Goods Sold",
+    rows: [
+      { lo: "2", topic: "Compute subtotals in a multi-step income statement", questions: 2 },
+      { lo: "3", topic: "When to use different inventory methods", questions: 1 },
+      {
+        lo: "",
+        topic: "Compute COGS or ending inventory using FIFO or LIFO",
+        questions: 2,
+        gap: "Note what this says: FIFO or LIFO. Weighted average is not named anywhere on the blueprint, though the practice paper has one.",
+      },
+      { lo: "4", topic: "Financial and tax effects of different inventory methods", questions: 2 },
+      { lo: "5", topic: "Record purchase and sale of inventory", questions: 2 },
+      { lo: "6", topic: "Understand lower of cost and net realizable value", questions: 1 },
+    ],
+  },
+  {
+    chapter: "Ch. 7",
+    title: "Long-Term Assets",
+    rows: [
+      { lo: "1", topic: "Record purchase of tangible assets", questions: 1 },
+      { lo: "", topic: "Record a lump-sum purchase", questions: 1 },
+      { lo: "2", topic: "Characteristics of different intangible assets", questions: 2 },
+      {
+        lo: "3",
+        topic: "Accounting treatment of subsequent expenditures",
+        questions: 2,
+        gap: "Two marks on capitalise-versus-expense, and the practice paper barely touches it.",
+      },
+      { lo: "4", topic: "Calculate depreciation or accumulated depreciation, straight-line or DDB", questions: 2 },
+      {
+        lo: "5",
+        topic: "Calculate amortization expense and the carrying value of an intangible",
+        questions: 1,
+        gap: "The practice paper only asks which intangible does not amortise — never asks you to compute one.",
+      },
+      { lo: "6", topic: "Determine gain or loss on sale of an asset", questions: 1 },
+    ],
+  },
+];
+
 const ACCT_EXAM_2: ExamPlan = {
   label: "Exam 2",
   date: "2026-10-27",
@@ -78,9 +182,13 @@ const ACCT_EXAM_2: ExamPlan = {
   where: "WTHR 200",
   covers: "Chapters 4–7 (Module 2)",
   weight: "20% of your grade",
+  blueprint: ACCT_BLUEPRINT,
   situation: [
     "Exam 2 is worth 20%, more than Exam 1's 15% — and Exam 3 is another 25%. " +
       "Most of the exam weight in this course is still ahead of you.",
+    "Dr. Bokrand's review worksheet gives the exact shape of the paper: 40 " +
+      "questions, exactly 10 from each chapter. No chapter is worth more than " +
+      "another, so there is nothing to skip and nothing to over-invest in.",
     "Chapters 1–3 were the accounting cycle itself. Chapters 4–7 are four new " +
       "topics, but every one of them is tested *through* journal entries. " +
       "Whatever cost points last time will show up again unless it gets fixed " +
@@ -93,10 +201,11 @@ const ACCT_EXAM_2: ExamPlan = {
     {
       chapter: "Ch. 4",
       title: "Cash and Internal Controls",
-      emphasis: "medium",
+      emphasis: "high",
       because:
-        "Procedural and self-contained — the most reliably earnable points on " +
-        "the exam once the format is familiar.",
+        "Ten questions, same as every other chapter — and three of them are on " +
+        "the definitions and components of internal control, the single " +
+        "biggest topic on the paper.",
       mustKnow: [
         "Bank reconciliation: which items adjust the bank side, which adjust the book side",
         "Journal entries from a reconciliation",
@@ -110,10 +219,11 @@ const ACCT_EXAM_2: ExamPlan = {
     },
     {
       chapter: "Ch. 5",
-      title: "Receivables and Sales",
+      title: "Receivables and Revenues",
       emphasis: "high",
       because:
-        "The allowance method is the most commonly missed topic in the whole course.",
+        "Ten questions. Four of them are allowance-method mechanics, and one of " +
+        "those is the aging method, which the practice paper never asks.",
       mustKnow: [
         "Allowance method: percentage-of-receivables vs percentage-of-sales",
         "Aging schedules",
@@ -132,7 +242,7 @@ const ACCT_EXAM_2: ExamPlan = {
       title: "Inventory and Cost of Goods Sold",
       emphasis: "high",
       because:
-        "Purely computational, which makes it easy to examine and easy to lose points on under time pressure.",
+        "Ten questions, and eight of them are computational — the chapter where the clock costs people the most.",
       mustKnow: [
         "FIFO, LIFO and weighted average — periodic and perpetual",
         "Cost of goods available for sale = beginning inventory + purchases",
@@ -150,7 +260,7 @@ const ACCT_EXAM_2: ExamPlan = {
       title: "Long-Term Assets",
       emphasis: "high",
       because:
-        "Three depreciation methods plus disposals means the most distinct calculations of any chapter on this exam.",
+        "Ten questions spread over seven different objectives — the widest chapter on the paper, so nothing here can be skipped.",
       mustKnow: [
         "Capitalize vs expense",
         "Straight-line, double-declining-balance, activity-based depreciation",
@@ -238,6 +348,35 @@ const ACCT_EXAM_2: ExamPlan = {
     },
   ],
   problems: [
+    {
+      id: "aging-method",
+      topic: "Ch. 5 — Aging method",
+      question:
+        "Prepare the bad debt adjustment from this aging schedule, then state " +
+        "net accounts receivable. The Allowance for Uncollectible Accounts has " +
+        "a $2,000 CREDIT balance before adjustment.\n\n" +
+        "  Not yet due        $120,000   2% uncollectible\n" +
+        "  1–30 days past due   40,000  10%\n" +
+        "  31–60 days past due  20,000  25%\n" +
+        "  Over 60 days         10,000  50%",
+      answer:
+        "Required allowance, band by band:\n" +
+        "  120,000 × 2%  =  2,400\n" +
+        "   40,000 × 10% =  4,000\n" +
+        "   20,000 × 25% =  5,000\n" +
+        "   10,000 × 50% =  5,000\n" +
+        "  Required balance = 16,400\n\n" +
+        "Already a $2,000 credit there, so the entry is the difference:\n\n" +
+        "Dr Bad Debt Expense                       14,400\n" +
+        "   Cr Allowance for Uncollectible Accounts  14,400\n\n" +
+        "Net accounts receivable = $190,000 − $16,400 = $173,600",
+      trap:
+        "Aging is percentage-of-RECEIVABLES, so you are adjusting TO $16,400, " +
+        "not BY it. The bands only ever produce the required ENDING balance — " +
+        "the expense is whatever closes the gap from where the allowance " +
+        "already sits. Your blueprint has a question on this and the practice " +
+        "paper has none.",
+    },
     {
       id: "allowance-receivables",
       topic: "Ch. 5 — Allowance method",
@@ -349,6 +488,27 @@ const ACCT_EXAM_2: ExamPlan = {
       trap:
         "Only the book side generates entries. A quick test: if the bank already " +
         "knows about it and you didn't, it's a book-side item and needs an entry.",
+    },
+    {
+      id: "amortization-carrying",
+      topic: "Ch. 7 — Amortization",
+      question:
+        "A patent is purchased for $20,000 on 1 January 2024 with a ten-year " +
+        "useful life. Record one year of amortization, and state the carrying " +
+        "value at 31 December 2026.",
+      answer:
+        "Annual amortization = $20,000 ÷ 10 = $2,000\n\n" +
+        "Dr Amortization Expense   2,000\n" +
+        "   Cr Patent                 2,000\n\n" +
+        "By 31 December 2026 three years have run (2024, 2025, 2026):\n" +
+        "  Accumulated = 3 × 2,000 = 6,000\n" +
+        "  Carrying value = 20,000 − 6,000 = $14,000",
+      trap:
+        "Intangibles are usually credited directly rather than through a contra " +
+        "account, so there is no Accumulated Amortization line to read the " +
+        "carrying value off — you have to count the years. Your blueprint asks " +
+        "for the calculation; the practice paper only asks which intangible " +
+        "doesn't amortise.",
     },
     {
       id: "capitalize",
