@@ -285,8 +285,9 @@ const ACCT_EXAM_2: ExamPlan = {
       tasks: [
         "30 min — Re-do three Ch. 1–3 journal entry and adjusting entry problems cold. If these feel slow, that is the thing to fix first; everything this week sits on top of them.",
         "Get Exam 1 back and write down every question you lost, by topic.",
-        "60 min — Ch. 4: work three complete bank reconciliations, including the journal entries.",
-        "30 min — Ch. 4 notes packet and SmartBook review questions.",
+        "45 min — Ch. 4 packet Activity 2: a full bank reconciliation and its journal entries. Two questions on the exam.",
+        "20 min — Ch. 4 Activity 3, petty cash, and Activity 1, cash and cash equivalents.",
+        "25 min — Internal control definitions and components. Three questions ride on this — the biggest single topic on the paper, and it is pure memorisation.",
       ],
     },
     {
@@ -294,10 +295,11 @@ const ACCT_EXAM_2: ExamPlan = {
       focus: "Chapter 5 — Receivables",
       minutes: 150,
       tasks: [
-        "45 min — Allowance method both ways. Do the same scenario under percentage-of-receivables and percentage-of-sales until the difference is obvious.",
-        "30 min — Three problems where the unadjusted allowance starts with a DEBIT balance.",
-        "30 min — Write-offs and recoveries. State the effect on assets and on net income each time.",
-        "30 min — Notes receivable and interest accruals.",
+        "40 min — Packet Examples 6 and 7: the POR method and the aging method, back to back, until the difference is obvious. Four of the ten Ch. 5 marks are here.",
+        "25 min — Activity 2, then redo Example 7's aging schedule from scratch. The practice exam never tests aging and the real one will.",
+        "25 min — Examples 1 to 4: credit sales, discounts, returns and net revenues. Four more marks.",
+        "30 min — Example 8 and Activity 3: notes receivable and the interest accrual.",
+        "20 min — Write-offs and their effect on the accounting equation. One mark, and the answer is no net effect.",
       ],
     },
     {
@@ -305,10 +307,12 @@ const ACCT_EXAM_2: ExamPlan = {
       focus: "Chapter 6 — Inventory",
       minutes: 165,
       tasks: [
-        "60 min — Take one dataset and compute ending inventory and COGS under FIFO, LIFO and weighted average. Repeat with a second dataset without looking back.",
-        "30 min — The same thing perpetual rather than periodic.",
-        "30 min — Lower of cost and net realizable value.",
-        "45 min — Re-do anything from Ch. 5 you got wrong yesterday.",
+        "45 min — Examples 1 and 2 plus Activity 1: COGS and ending inventory under FIFO and LIFO. The blueprint names only these two methods.",
+        "20 min — Example 3, weighted average. Lower priority: taught, but the blueprint never names it.",
+        "30 min — Example 4 and Activity 4: financial statement and tax effects of each method. Two marks.",
+        "30 min — Activity 2 and Example 5: recording purchases and sales, and the FIFO-to-LIFO adjustment.",
+        "20 min — Activity 3, lower of cost and net realizable value.",
+        "20 min — Multi-step income statement subtotals. Two marks, and operating income excludes interest and tax.",
       ],
     },
     {
@@ -316,21 +320,23 @@ const ACCT_EXAM_2: ExamPlan = {
       focus: "Chapter 7 — Long-term assets",
       minutes: 165,
       tasks: [
-        "30 min — Capitalize vs expense: sort twenty items into the two piles.",
-        "45 min — All three depreciation methods on one asset, then a partial-year version.",
-        "45 min — Disposals at a gain, at a loss, and at exactly book value.",
-        "30 min — Intangibles and amortization.",
+        "30 min — Example 1 and Activity 1: tangible asset cost, and the lump-sum purchase split by relative fair value.",
+        "35 min — Example 2 and Activity 2: straight-line and double-declining balance. Skip Activity 3 — units-of-production is not on the blueprint.",
+        "30 min — Subsequent expenditures, capitalise versus expense. Two marks, and the practice exam barely covers it.",
+        "30 min — Example 3, the patent: R&D expensed, legal fees capitalised, shorter of legal and service life, part-year charge.",
+        "30 min — Activity 4, a part-year disposal. Depreciate up to the sale date before computing the gain.",
+        "20 min — Characteristics of the different intangibles. Two marks, straight memorisation.",
       ],
     },
     {
       date: "2026-10-26",
-      focus: "Mixed practice, timed, no notes",
+      focus: "Sit the practice exam, then work your errors",
       minutes: 150,
       tasks: [
-        "60 min — A mixed problem set across all four chapters, timed, closed-book. This is the day to find out what is actually still shaky.",
-        "45 min — Re-do every problem you missed this week. These are worth more than new ones.",
-        "30 min — Re-run the Ch. 4–7 SmartBook questions in Connect.",
-        "15 min — Write a one-page sheet of the formulas and the traps, in your own hand.",
+        "60 min — Sit the practice exam on the Practice exam tab. Timed, no notes, paper and calculator only.",
+        "40 min — Mark it, then work back through every question you missed from the packet rather than from the answer.",
+        "30 min — Empty the missed pile in Drill mode.",
+        "20 min — Write a one-page sheet of formulas and traps, in your own hand.",
       ],
     },
     {
@@ -352,30 +358,36 @@ const ACCT_EXAM_2: ExamPlan = {
       id: "aging-method",
       topic: "Ch. 5 — Aging method",
       question:
-        "Prepare the bad debt adjustment from this aging schedule, then state " +
-        "net accounts receivable. The Allowance for Uncollectible Accounts has " +
-        "a $2,000 CREDIT balance before adjustment.\n\n" +
-        "  Not yet due        $120,000   2% uncollectible\n" +
-        "  1–30 days past due   40,000  10%\n" +
-        "  31–60 days past due  20,000  25%\n" +
-        "  Over 60 days         10,000  50%",
+        "Tulin's Aviation uses the aging method. At 31 December:\n\n" +
+        "  Credit sales during the year   $300,000\n" +
+        "  Ending Accounts Receivable      $50,000\n" +
+        "  Unadjusted AUA                   $1,000 Cr.\n\n" +
+        "Aging schedule:\n" +
+        "  1–30 days    $35,000    2% uncollectible\n" +
+        "  31–60 days   $12,000   20%\n" +
+        "  over 60 days  $3,000   60%\n\n" +
+        "Calculate the ending AUA and record the adjusting entry.",
       answer:
-        "Required allowance, band by band:\n" +
-        "  120,000 × 2%  =  2,400\n" +
-        "   40,000 × 10% =  4,000\n" +
-        "   20,000 × 25% =  5,000\n" +
-        "   10,000 × 50% =  5,000\n" +
-        "  Required balance = 16,400\n\n" +
-        "Already a $2,000 credit there, so the entry is the difference:\n\n" +
-        "Dr Bad Debt Expense                       14,400\n" +
-        "   Cr Allowance for Uncollectible Accounts  14,400\n\n" +
-        "Net accounts receivable = $190,000 − $16,400 = $173,600",
+        "Required ending AUA, band by band:\n" +
+        "  35,000 × 2%  =   700\n" +
+        "  12,000 × 20% = 2,400\n" +
+        "   3,000 × 60% = 1,800\n" +
+        "  Ending AUA   = 4,900\n\n" +
+        "AUA already holds $1,000 credit, so the entry closes the $3,900 gap:\n\n" +
+        "Dr Bad Debt Expense (BDE)   3,900\n" +
+        "   Cr Allowance for Uncollectible Accounts (AUA)   3,900\n\n" +
+        "  AUA T-account:\n" +
+        "    Unadjusted balance   1,000\n" +
+        "    Bad Debt Expense     3,900\n" +
+        "    Ending AUA           4,900\n\n" +
+        "Net accounts receivable = $50,000 − $4,900 = $45,100",
       trap:
-        "Aging is percentage-of-RECEIVABLES, so you are adjusting TO $16,400, " +
-        "not BY it. The bands only ever produce the required ENDING balance — " +
-        "the expense is whatever closes the gap from where the allowance " +
-        "already sits. Your blueprint has a question on this and the practice " +
-        "paper has none.",
+        "The $300,000 of credit sales is a distractor — aging is a " +
+        "percentage-of-RECEIVABLES method and never touches the sales figure. " +
+        "The bands give the required ENDING balance, so the expense is whatever " +
+        "closes the gap from where AUA already sits. This is Example 7 from your " +
+        "Ch. 5 packet; the blueprint has a question on it and the practice exam " +
+        "has none.",
     },
     {
       id: "allowance-receivables",
@@ -491,24 +503,32 @@ const ACCT_EXAM_2: ExamPlan = {
     },
     {
       id: "amortization-carrying",
-      topic: "Ch. 7 — Amortization",
+      topic: "Ch. 7 — Intangibles and amortization",
       question:
-        "A patent is purchased for $20,000 on 1 January 2024 with a ten-year " +
-        "useful life. Record one year of amortization, and state the carrying " +
-        "value at 31 December 2026.",
+        "From January to May, a company's R&D team spends $200,000 developing " +
+        "new software. On 30 June it registers a patent, paying $7,200 cash in " +
+        "legal and registration fees. The patent gives 20 years of legal " +
+        "protection, but the software's service life is estimated at 8 years. " +
+        "The year end is 31 December.\n\n" +
+        "Record the patent, then the year-one amortization.",
       answer:
-        "Annual amortization = $20,000 ÷ 10 = $2,000\n\n" +
-        "Dr Amortization Expense   2,000\n" +
-        "   Cr Patent                 2,000\n\n" +
-        "By 31 December 2026 three years have run (2024, 2025, 2026):\n" +
-        "  Accumulated = 3 × 2,000 = 6,000\n" +
-        "  Carrying value = 20,000 − 6,000 = $14,000",
+        "The $200,000 of R&D was expensed as incurred and is NOT part of the patent.\n\n" +
+        "1. Record the patent — legal and registration fees only:\n\n" +
+        "Dr Patent     7,200\n" +
+        "   Cr Cash       7,200\n\n" +
+        "2. Amortize over the SHORTER of legal life (20) and service life (8):\n" +
+        "   $7,200 ÷ 8 years = $900 per year\n" +
+        "   Registered 30 June, so only 6 months have run:\n" +
+        "   $900 × 6/12 = $450\n\n" +
+        "Dr Amortization Expense   450\n" +
+        "   Cr Patent                 450\n\n" +
+        "Carrying value at 31 December = $7,200 − $450 = $6,750",
       trap:
-        "Intangibles are usually credited directly rather than through a contra " +
-        "account, so there is no Accumulated Amortization line to read the " +
-        "carrying value off — you have to count the years. Your blueprint asks " +
-        "for the calculation; the practice paper only asks which intangible " +
-        "doesn't amortise.",
+        "Three separate traps in one question, which is why it is Example 3 in " +
+        "your packet: R&D is expensed and never capitalised; you amortise over " +
+        "the shorter life, so 8 years and not 20; and a mid-year registration " +
+        "means a part-year charge. Your blueprint asks for this calculation and " +
+        "the practice exam never does.",
     },
     {
       id: "capitalize",

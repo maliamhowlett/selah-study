@@ -145,9 +145,10 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
       "Accounts Receivable is $80,000. The Allowance for Uncollectible Accounts has a $1,200 CREDIT balance before adjustment. Estimate 6% of receivables uncollectible.",
     entry: [
       { account: "Bad Debt Expense", debit: 3600 },
-      { account: "Allowance for Uncollectible Accounts", credit: 3600 },
+      { account: "Allowance for Uncollectible Accounts (AUA)", credit: 3600 },
     ],
-    note: "Target $4,800, already $1,200 there, so the entry is the $3,600 difference.",
+    note:
+      "Target $4,800, already $1,200 there, so the entry is the $3,600 difference. Your packet calls this the POR (percentage-of-receivables) method, and writes the accounts as BDE and AUA.",
   },
   {
     id: "d-allowance-debit-start",
@@ -243,6 +244,39 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
     note: "Freight-IN is a cost of getting the goods ready to sell, so it is capitalised into inventory.",
   },
   {
+    id: "d-fifo-lifo-adjust",
+    chapter: "Ch. 6",
+    prompt:
+      "A company tracks inventory internally on FIFO but reports on LIFO. At 31 December, ending inventory is $2,800 under FIFO and would be $1,800 under LIFO. Record the adjustment.",
+    entry: [
+      { account: "Cost of Goods Sold", debit: 1000 },
+      { account: "Inventory", credit: 1000 },
+    ],
+    note:
+      "This is Example 5 from your Ch. 6 notes packet. LIFO inventory is lower, so inventory comes down $1,000 and the difference lands in COGS.",
+  },
+  {
+    id: "d-freight-out",
+    chapter: "Ch. 6",
+    prompt: "Pay $500 cash to ship goods OUT to a customer.",
+    entry: [
+      { account: "Selling Expense", debit: 500 },
+      { account: "Cash", credit: 500 },
+    ],
+    note:
+      "Freight-OUT is an expense — either selling expense or COGS — and never touches Inventory. Freight-IN is capitalised into Inventory. Your packet puts these side by side for a reason.",
+  },
+  {
+    id: "d-purchase-return",
+    chapter: "Ch. 6",
+    prompt: "Return $1,500 of damaged inventory bought on account to the supplier.",
+    entry: [
+      { account: "Accounts Payable", debit: 1500 },
+      { account: "Inventory", credit: 1500 },
+    ],
+    note: "Purchase returns are recorded directly against Inventory under perpetual — there is no separate returns account on the buyer's side.",
+  },
+  {
     id: "d-lcnrv",
     chapter: "Ch. 6",
     prompt:
@@ -336,6 +370,46 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
       { account: "Cash", credit: 1200 },
     ],
     note: "Routine upkeep is expensed however large the bill. Only improvements get capitalised.",
+  },
+  {
+    id: "d-patent-rd",
+    chapter: "Ch. 7",
+    prompt:
+      "An R&D team spends $200,000 developing new software. On 30 June the company then pays $7,200 cash in legal and registration fees to patent it. Record the patent.",
+    entry: [
+      { account: "Patent", debit: 7200 },
+      { account: "Cash", credit: 7200 },
+    ],
+    note:
+      "Only the $7,200 is capitalised. The $200,000 of R&D was expensed as incurred — it never becomes part of the patent. This is Example 3 from your Ch. 7 packet.",
+  },
+  {
+    id: "d-patent-amortize",
+    chapter: "Ch. 7",
+    prompt:
+      "That $7,200 patent was registered on 30 June. Legal protection runs 20 years but the software's service life is estimated at 8 years. Record amortization at the 31 December year end.",
+    entry: [
+      { account: "Amortization Expense", debit: 450 },
+      { account: "Patent", credit: 450 },
+    ],
+    note:
+      "Amortise over the SHORTER of legal life and service life — 8 years, not 20. $7,200 ÷ 8 = $900 a year, and only six months have run: $900 × 6/12 = $450.",
+  },
+  {
+    id: "d-disposal-partial-year",
+    chapter: "Ch. 7",
+    prompt:
+      "Equipment costing $35,000 was bought on 1 Jan 2023. Seven-year life, no residual, straight-line, December year end. It is sold on 30 June 2025 for $28,000. Record the depreciation in the year of sale, then the disposal.",
+    entry: [
+      { account: "Depreciation Expense", debit: 2500 },
+      { account: "Accumulated Depreciation", credit: 2500 },
+      { account: "Cash", debit: 28000 },
+      { account: "Accumulated Depreciation", debit: 12500 },
+      { account: "Equipment", credit: 35000 },
+      { account: "Gain on Sale of Equipment", credit: 5500 },
+    ],
+    note:
+      "$35,000 ÷ 7 = $5,000 a year. 2023 and 2024 give $10,000, plus six months of 2025 = $2,500, so accumulated is $12,500 and book value is $22,500. Sold for $28,000 → a $5,500 gain. Skipping the half-year of depreciation is what makes this one go wrong.",
   },
   {
     id: "d-amortization",
