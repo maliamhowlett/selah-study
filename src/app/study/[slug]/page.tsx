@@ -1,0 +1,223 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { CLASSES } from "@/lib/classes";
+import { COURSE_STYLES, detectCourse } from "@/lib/calendar/courses";
+import { COURSE_STUDY, campusToday, campusWeekday, daysUntil } from "@/lib/study/plans";
+import DayPlan from "@/components/study/DayPlan";
+import PracticeProblems from "@/components/study/PracticeProblems";
+
+export function generateStaticParams() {
+  return CLASSES.map((cls) => ({ slug: cls.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const cls = CLASSES.find((c) => c.slug === slug);
+  return {
+    title: cls ? `${cls.courseCode} study — Selah Study` : "Study — Selah Study",
+  };
+}
+
+const labelClass = "mb-3 text-[10px] uppercase tracking-[0.2em] text-muted";
+
+export default async function CourseStudyPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const cls = CLASSES.find((c) => c.slug === slug);
+  const study = COURSE_STUDY[slug];
+  if (!cls || !study) notFound();
+
+  const course = COURSE_STYLES[detectCourse(cls.courseCode, cls.title)];
+  const plan = study.examPlan;
+  const today = campusToday();
+  const away = plan ? daysUntil(plan.date, today) : null;
+  const weekday = campusWeekday();
+
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-12">
+      <Link
+        href="/study"
+        className="mb-8 inline-block text-sm text-muted hover:text-foreground"
+      >
+        ← All classes
+      </Link>
+
+      <header className="mb-12">
+        <div className={`mb-5 h-1 w-14 rounded-full ${course.accent}`} />
+        <h1 className={`text-5xl italic sm:text-6xl ${course.text}`}>
+          {cls.courseCode}
+        </h1>
+        <p className="mt-2 text-lg text-muted">{cls.title}</p>
+        <p className="mt-5 max-w-2xl leading-relaxed text-muted">{study.approach}</p>
+      </header>
+
+      {plan && away !== null && (
+        <>
+          {/* The countdown is the reason this page gets opened, so it leads. */}
+          <section
+            className={`mb-12 rounded-3xl border p-6 sm:p-8 ${course.border} ${course.tint}`}
+          >
+            <p className={`text-xs uppercase tracking-[0.2em] ${course.text} opacity-80`}>
+              {plan.label} · {plan.weight}
+            </p>
+            <p className={`mt-2 text-4xl italic sm:text-5xl ${course.text}`}>
+              {away < 0
+                ? "has passed"
+                : away === 0
+                  ? "is today"
+                  : `${away} day${away === 1 ? "" : "s"} away`}
+            </p>
+            <dl className="mt-6 grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-3">
+              <div>
+                <dt className="text-muted">When</dt>
+                <dd className="text-foreground">{plan.when}</dd>
+              </div>
+              <div>
+                <dt className="text-muted">Where</dt>
+                <dd className="text-foreground">{plan.where}</dd>
+              </div>
+              <div>
+                <dt className="text-muted">Covers</dt>
+                <dd className="text-foreground">{plan.covers}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="mb-14">
+            <h2 className="mb-4 text-3xl italic text-foreground">Where you stand</h2>
+            <div className="flex flex-col gap-3">
+              {plan.situation.map((line) => (
+                <p key={line.slice(0, 32)} className="max-w-2xl leading-relaxed text-muted">
+                  {line}
+                </p>
+              ))}
+            </div>
+          </section>
+
+          <section className="mb-14">
+            <h2 className="mb-2 text-3xl italic text-foreground">The plan</h2>
+            <p className="mb-6 max-w-2xl text-sm text-muted">
+              Tick things off as you go — it saves in this browser.
+            </p>
+            <DayPlan
+              days={plan.days}
+              slug={slug}
+              today={today}
+              accentText={course.text}
+              accentBorder={course.border}
+              accentTint={course.tint}
+            />
+          </section>
+
+          <section className="mb-14">
+            <h2 className="mb-6 text-3xl italic text-foreground">What&apos;s on it</h2>
+            <div className="flex flex-col gap-5">
+              {plan.topics.map((topic) => (
+                <article
+                  key={topic.chapter}
+                  className="rounded-2xl border border-border bg-surface p-5"
+                >
+                  <div className="mb-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <h3 className="text-lg text-foreground">
+                      <span className={course.text}>{topic.chapter}</span> {topic.title}
+                    </h3>
+                    {topic.emphasis === "high" && (
+                      <span className="rounded-full bg-exam px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-white">
+                        Highest yield
+                      </span>
+                    )}
+                  </div>
+                  <p className="mb-4 text-sm text-muted">{topic.because}</p>
+
+                  <p className={labelClass}>Must know</p>
+                  <ul className="mb-4 flex flex-col gap-1.5">
+                    {topic.mustKnow.map((item) => (
+                      <li key={item} className="flex gap-2.5 text-sm text-foreground">
+                        <span aria-hidden="true" className="text-muted">
+                          ·
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <p className={labelClass}>Easy to get wrong</p>
+                  <ul className="flex flex-col gap-2">
+                    {topic.traps.map((trap) => (
+                      <li
+                        key={trap.slice(0, 32)}
+                        className="border-l-2 border-exam bg-exam-light px-3.5 py-2 text-sm leading-relaxed text-foreground"
+                      >
+                        {trap}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="mb-14">
+            <h2 className="mb-2 text-3xl italic text-foreground">Practice</h2>
+            <p className="mb-6 max-w-2xl text-sm text-muted">
+              Work each one on paper before you reveal anything. Getting it wrong
+              now is the cheapest it will ever be.
+            </p>
+            <PracticeProblems problems={plan.problems} accentText={course.text} />
+          </section>
+        </>
+      )}
+
+      <section className="border-t border-border pt-10">
+        <h2 className="mb-2 text-3xl italic text-foreground">Where to get help</h2>
+        <p className="mb-6 max-w-2xl text-sm text-muted">
+          All of this is free and already paid for by your tuition.
+        </p>
+        <div className="flex flex-col gap-3">
+          {study.help.map((source) => {
+            const availableToday = source.days?.includes(weekday) ?? false;
+            return (
+              <div
+                key={source.label}
+                className={`rounded-2xl border p-4 ${
+                  availableToday ? `${course.border} ${course.tint}` : "border-border bg-surface"
+                }`}
+              >
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <p
+                    className={`font-medium ${availableToday ? course.text : "text-foreground"}`}
+                  >
+                    {source.label}
+                  </p>
+                  {availableToday && (
+                    <span
+                      className={`rounded-full border border-current px-2.5 py-0.5 text-[10px] uppercase tracking-wider ${course.text}`}
+                    >
+                      Today
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-sm leading-relaxed text-muted">{source.detail}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <p className="mt-10 text-xs text-muted">
+        Everything here is built from your syllabus.{" "}
+        <Link href="/syllabus" className="underline underline-offset-4 hover:text-foreground">
+          See the full grade breakdown
+        </Link>
+        .
+      </p>
+    </div>
+  );
+}
