@@ -43,3 +43,7 @@ next-env.d.ts
 
 # per-user seed files (contain UIDs)
 supabase/seed-*.sql
+
+
+# Course material (copyrighted, and not ours to publish)
+course-materials/

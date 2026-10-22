@@ -3,8 +3,12 @@ import { notFound } from "next/navigation";
 import { CLASSES } from "@/lib/classes";
 import { COURSE_STYLES, detectCourse } from "@/lib/calendar/courses";
 import { COURSE_STUDY, campusToday, campusWeekday, daysUntil } from "@/lib/study/plans";
+import { ACCT_MOCK_EXAM } from "@/lib/study/acct-exam";
 import DayPlan from "@/components/study/DayPlan";
+import DrillRunner from "@/components/study/DrillRunner";
+import MockExam from "@/components/study/MockExam";
 import PracticeProblems from "@/components/study/PracticeProblems";
+import StudyModes, { type StudyMode } from "@/components/study/StudyModes";
 
 export function generateStaticParams() {
   return CLASSES.map((cls) => ({ slug: cls.slug }));
@@ -39,6 +43,8 @@ export default async function CourseStudyPage({
   const today = campusToday();
   const away = plan ? daysUntil(plan.date, today) : null;
   const weekday = campusWeekday();
+  // The drill bank and the practice exam are ACCT-specific so far.
+  const hasDrills = slug === "acct-20000";
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
@@ -102,17 +108,65 @@ export default async function CourseStudyPage({
           </section>
 
           <section className="mb-14">
-            <h2 className="mb-2 text-3xl italic text-foreground">The plan</h2>
-            <p className="mb-6 max-w-2xl text-sm text-muted">
-              Tick things off as you go — it saves in this browser.
-            </p>
-            <DayPlan
-              days={plan.days}
-              slug={slug}
-              today={today}
+            <StudyModes
               accentText={course.text}
               accentBorder={course.border}
               accentTint={course.tint}
+              modes={
+                [
+                  {
+                    id: "plan",
+                    label: "The plan",
+                    blurb: "What to do on which day. Tick things off — it saves in this browser.",
+                    content: (
+                      <DayPlan
+                        days={plan.days}
+                        slug={slug}
+                        today={today}
+                        accentText={course.text}
+                        accentBorder={course.border}
+                        accentTint={course.tint}
+                      />
+                    ),
+                  },
+                  hasDrills && {
+                    id: "drill",
+                    label: "Drill",
+                    blurb:
+                      "One at a time, fast. Write the entry out before you check it — reading an answer you didn't attempt teaches almost nothing. Mark yourself honestly and the misses come back.",
+                    content: (
+                      <DrillRunner
+                        accentText={course.text}
+                        accentBorder={course.border}
+                        accentTint={course.tint}
+                      />
+                    ),
+                  },
+                  {
+                    id: "problems",
+                    label: "Problems",
+                    blurb:
+                      "Longer, multi-step questions of the kind that carry the most marks. Work each on paper first.",
+                    content: (
+                      <PracticeProblems problems={plan.problems} accentText={course.text} />
+                    ),
+                  },
+                  hasDrills && {
+                    id: "exam",
+                    label: "Practice exam",
+                    blurb:
+                      "The real thing, timed, with the answers held back until you finish.",
+                    content: (
+                      <MockExam
+                        exam={ACCT_MOCK_EXAM}
+                        accentText={course.text}
+                        accentBorder={course.border}
+                        accentTint={course.tint}
+                      />
+                    ),
+                  },
+                ].filter(Boolean) as StudyMode[]
+              }
             />
           </section>
 
@@ -162,15 +216,6 @@ export default async function CourseStudyPage({
                 </article>
               ))}
             </div>
-          </section>
-
-          <section className="mb-14">
-            <h2 className="mb-2 text-3xl italic text-foreground">Practice</h2>
-            <p className="mb-6 max-w-2xl text-sm text-muted">
-              Work each one on paper before you reveal anything. Getting it wrong
-              now is the cheapest it will ever be.
-            </p>
-            <PracticeProblems problems={plan.problems} accentText={course.text} />
           </section>
         </>
       )}
