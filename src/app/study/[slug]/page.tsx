@@ -135,7 +135,7 @@ export default async function CourseStudyPage({
                     id: "drill",
                     label: "Drill",
                     blurb:
-                      "One at a time, fast. Write the entry out before you check it — reading an answer you didn't attempt teaches almost nothing. Mark yourself honestly and the misses come back.",
+                      "Type the entry, then check it — you get told exactly what's wrong: wrong side, wrong amount, wrong account, missing line. Abbreviations are fine, AUA and BDE both work. Only your first attempt counts, and whatever you miss comes back.",
                     content: (
                       <DrillRunner
                         accentText={course.text}

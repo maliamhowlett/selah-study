@@ -5,15 +5,18 @@ import {
   CLASSIFICATION_DRILLS,
   DRILL_CHAPTERS,
   JOURNAL_DRILLS,
+  type ClassificationDrill,
   type EntryLine,
   type JournalDrill,
 } from "@/lib/study/acct-drills";
+import { gradeEntry, type GradeResult, type SubmittedLine } from "@/lib/study/grade-entry";
 import { useStoredValue, writeStoredValue } from "@/lib/study/local-store";
 
 type Result = "got" | "missed";
 type Kind = "journal" | "classification";
 
 const STORE_KEY = "selah:drills:acct-20000";
+const BLANK: SubmittedLine = { account: "", debit: "", credit: "" };
 
 function parseResults(raw: string | null): Record<string, Result> {
   try {
@@ -26,16 +29,11 @@ function parseResults(raw: string | null): Record<string, Result> {
 const money = (n: number) =>
   n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-/**
- * Splits a drill's lines into separate journal entries. A credit followed by a
- * debit means the first entry has closed — which is how the two-entry answers
- * (a recovery, a perpetual sale) get ruled apart instead of running together.
- */
+/** A credit followed by a debit means a second entry has begun. */
 function splitEntries(lines: EntryLine[]): EntryLine[][] {
   const entries: EntryLine[][] = [];
   let current: EntryLine[] = [];
   let seenCredit = false;
-
   for (const line of lines) {
     if (line.debit !== undefined && seenCredit) {
       entries.push(current);
@@ -84,16 +82,24 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
   const [chapter, setChapter] = useState<string>("all");
   const [missedOnly, setMissedOnly] = useState(false);
   const [index, setIndex] = useState(0);
-  const [revealed, setRevealed] = useState(false);
+
+  // Journal attempt state
+  const [rows, setRows] = useState<SubmittedLine[]>([{ ...BLANK }, { ...BLANK }]);
+  const [grade, setGrade] = useState<GradeResult | null>(null);
+
+  // Classification attempt state
+  const [pickStatement, setPickStatement] = useState<string | null>(null);
+  const [pickBalance, setPickBalance] = useState<string | null>(null);
+  const [checked, setChecked] = useState(false);
+
+  const [copied, setCopied] = useState(false);
 
   const raw = useStoredValue(STORE_KEY);
   const results = useMemo(() => parseResults(raw), [raw]);
 
   const deck = useMemo(() => {
     if (kind === "classification") {
-      return CLASSIFICATION_DRILLS.filter(
-        (d) => !missedOnly || results[d.id] === "missed",
-      );
+      return CLASSIFICATION_DRILLS.filter((d) => !missedOnly || results[d.id] === "missed");
     }
     return JOURNAL_DRILLS.filter(
       (d) =>
@@ -102,20 +108,44 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     );
   }, [kind, chapter, missedOnly, results]);
 
-  // Changing a filter can leave the cursor past the end of the new deck.
   const safeIndex = deck.length === 0 ? 0 : Math.min(index, deck.length - 1);
   const current = deck[safeIndex];
 
   const missedCount = Object.values(results).filter((r) => r === "missed").length;
   const gotCount = Object.values(results).filter((r) => r === "got").length;
 
-  const grade = (result: Result) => {
-    if (!current) return;
-    writeStoredValue(
-      STORE_KEY,
-      JSON.stringify({ ...results, [current.id]: result }),
-    );
-    setRevealed(false);
+  /** Where the misses are concentrated, so a weak chapter is visible as one. */
+  const weakSpots = useMemo(() => {
+    const byChapter = new Map<string, { missed: number; total: number }>();
+    for (const drill of JOURNAL_DRILLS) {
+      const result = results[drill.id];
+      if (!result) continue;
+      const row = byChapter.get(drill.chapter) ?? { missed: 0, total: 0 };
+      row.total += 1;
+      if (result === "missed") row.missed += 1;
+      byChapter.set(drill.chapter, row);
+    }
+    return [...byChapter.entries()]
+      .filter(([, v]) => v.missed > 0)
+      .sort((a, b) => b[1].missed / b[1].total - a[1].missed / a[1].total);
+  }, [results]);
+
+  const record = (id: string, result: Result) => {
+    // Only the first attempt counts, so a second look can't launder a miss.
+    if (results[id]) return;
+    writeStoredValue(STORE_KEY, JSON.stringify({ ...results, [id]: result }));
+  };
+
+  const resetAttempt = () => {
+    setRows([{ ...BLANK }, { ...BLANK }]);
+    setGrade(null);
+    setPickStatement(null);
+    setPickBalance(null);
+    setChecked(false);
+  };
+
+  const goNext = () => {
+    resetAttempt();
     setIndex(safeIndex + 1 >= deck.length ? 0 : safeIndex + 1);
   };
 
@@ -124,21 +154,61 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     if (next.chapter !== undefined) setChapter(next.chapter);
     if (next.missedOnly !== undefined) setMissedOnly(next.missedOnly);
     setIndex(0);
-    setRevealed(false);
+    resetAttempt();
+  };
+
+  const checkJournal = () => {
+    const drill = current as JournalDrill;
+    const result = gradeEntry(drill.entry, rows);
+    setGrade(result);
+    if (result.verdict !== "empty") {
+      record(drill.id, result.verdict === "correct" ? "got" : "missed");
+    }
+  };
+
+  const checkClassification = () => {
+    const drill = current as ClassificationDrill;
+    setChecked(true);
+    const right =
+      pickStatement === drill.statement && pickBalance === drill.normalBalance;
+    record(drill.id, right ? "got" : "missed");
+  };
+
+  const copyResults = async () => {
+    const lines = ["ACCT 20000 drill results", ""];
+    for (const [label, list] of [
+      ["Journal entries", JOURNAL_DRILLS as { id: string; chapter?: string; prompt?: string; account?: string }[]],
+      ["Account classification", CLASSIFICATION_DRILLS as { id: string; chapter?: string; prompt?: string; account?: string }[]],
+    ] as const) {
+      const done = list.filter((d) => results[d.id]);
+      if (done.length === 0) continue;
+      lines.push(`${label}:`);
+      for (const d of done) {
+        const mark = results[d.id] === "got" ? "correct" : "MISSED";
+        lines.push(`  [${mark}] ${d.chapter ?? ""} ${d.prompt ?? d.account ?? d.id}`.slice(0, 140));
+      }
+      lines.push("");
+    }
+    lines.push(`Totals: ${gotCount} right, ${missedCount} missed.`);
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Clipboard can be blocked; the counts on screen still tell the story.
+    }
   };
 
   const chipOff =
     "rounded-full border border-border px-3 py-1.5 text-xs text-muted hover:bg-surface-hover hover:text-foreground";
   const chipOn = `rounded-full border px-3 py-1.5 text-xs ${accentBorder} ${accentTint} ${accentText}`;
+  const inputClass =
+    "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none";
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => reset({ kind: "journal" })}
-          className={kind === "journal" ? chipOn : chipOff}
-        >
+        <button type="button" onClick={() => reset({ kind: "journal" })} className={kind === "journal" ? chipOn : chipOff}>
           Journal entries
         </button>
         <button
@@ -148,7 +218,6 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
         >
           Where does it go
         </button>
-
         {missedCount > 0 && (
           <button
             type="button"
@@ -162,20 +231,11 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
 
       {kind === "journal" && (
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => reset({ chapter: "all" })}
-            className={chapter === "all" ? chipOn : chipOff}
-          >
+          <button type="button" onClick={() => reset({ chapter: "all" })} className={chapter === "all" ? chipOn : chipOff}>
             All chapters
           </button>
           {DRILL_CHAPTERS.map((ch) => (
-            <button
-              key={ch}
-              type="button"
-              onClick={() => reset({ chapter: ch })}
-              className={chapter === ch ? chipOn : chipOff}
-            >
+            <button key={ch} type="button" onClick={() => reset({ chapter: ch })} className={chapter === ch ? chipOn : chipOff}>
               {ch}
             </button>
           ))}
@@ -203,9 +263,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
         <article className="rounded-2xl border border-border bg-surface p-6">
           <div className="mb-4 flex items-baseline justify-between gap-3">
             <span className={`text-xs uppercase tracking-[0.15em] ${accentText}`}>
-              {kind === "journal"
-                ? (current as JournalDrill).chapter
-                : "Account classification"}
+              {kind === "journal" ? (current as JournalDrill).chapter : "Account classification"}
             </span>
             <span className="text-xs tabular-nums text-muted">
               {safeIndex + 1} of {deck.length}
@@ -213,31 +271,188 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
           </div>
 
           {kind === "journal" ? (
-            <p className="leading-relaxed text-foreground">
-              {(current as JournalDrill).prompt}
-            </p>
-          ) : (
-            <div>
-              <p className="text-sm text-muted">
-                Which statement, which section, and what is its normal balance?
-              </p>
-              <p className="mt-2 text-2xl italic text-foreground">
-                {"account" in current ? current.account : ""}
-              </p>
-            </div>
-          )}
+            <>
+              <p className="leading-relaxed text-foreground">{(current as JournalDrill).prompt}</p>
+              {splitEntries((current as JournalDrill).entry).length > 1 && (
+                <p className="mt-2 text-xs text-muted">
+                  This answer is more than one entry — put every line in the grid.
+                </p>
+              )}
 
-          {!revealed ? (
-            <button
-              type="button"
-              onClick={() => setRevealed(true)}
-              className="mt-5 rounded-full gradient-primary px-6 py-2.5 text-sm text-white shadow-md hover:scale-[1.02]"
-            >
-              Check my answer
-            </button>
+              <div className="mt-5 overflow-x-auto">
+                <table className="w-full min-w-[26rem] text-sm">
+                  <thead>
+                    <tr>
+                      <th className="pb-2 text-left text-[10px] font-medium uppercase tracking-[0.15em] text-muted">
+                        Account
+                      </th>
+                      <th className="w-28 pb-2 pl-2 text-right text-[10px] font-medium uppercase tracking-[0.15em] text-muted">
+                        Debit
+                      </th>
+                      <th className="w-28 pb-2 pl-2 text-right text-[10px] font-medium uppercase tracking-[0.15em] text-muted">
+                        Credit
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((row, i) => (
+                      <tr key={i}>
+                        <td className="py-1 pr-2">
+                          <input
+                            value={row.account}
+                            disabled={grade !== null && grade.verdict !== "empty"}
+                            onChange={(e) =>
+                              setRows((r) => r.map((x, j) => (j === i ? { ...x, account: e.target.value } : x)))
+                            }
+                            placeholder="Account name"
+                            aria-label={`Account, line ${i + 1}`}
+                            className={inputClass}
+                          />
+                        </td>
+                        <td className="py-1 pl-2">
+                          <input
+                            value={row.debit}
+                            inputMode="decimal"
+                            disabled={grade !== null && grade.verdict !== "empty"}
+                            onChange={(e) =>
+                              setRows((r) => r.map((x, j) => (j === i ? { ...x, debit: e.target.value } : x)))
+                            }
+                            aria-label={`Debit, line ${i + 1}`}
+                            className={`${inputClass} text-right tabular-nums`}
+                          />
+                        </td>
+                        <td className="py-1 pl-2">
+                          <input
+                            value={row.credit}
+                            inputMode="decimal"
+                            disabled={grade !== null && grade.verdict !== "empty"}
+                            onChange={(e) =>
+                              setRows((r) => r.map((x, j) => (j === i ? { ...x, credit: e.target.value } : x)))
+                            }
+                            aria-label={`Credit, line ${i + 1}`}
+                            className={`${inputClass} text-right tabular-nums`}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {(grade === null || grade.verdict === "empty") && (
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRows((r) => [...r, { ...BLANK }])}
+                    className="rounded-full border border-border px-4 py-2 text-xs text-muted hover:bg-surface-hover hover:text-foreground"
+                  >
+                    + Another line
+                  </button>
+                  <button
+                    type="button"
+                    onClick={checkJournal}
+                    className="rounded-full gradient-primary px-6 py-2 text-sm text-white shadow-md hover:scale-[1.02]"
+                  >
+                    Check it
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <>
-              <div className="mt-5 rounded-xl bg-background p-4">
+              <p className="text-sm text-muted">Which statement, and what is its normal balance?</p>
+              <p className="mt-2 text-2xl italic text-foreground">
+                {(current as ClassificationDrill).account}
+              </p>
+
+              <div className="mt-5 flex flex-col gap-3">
+                <div className="flex flex-wrap gap-2">
+                  {(["Balance sheet", "Income statement"] as const).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      disabled={checked}
+                      onClick={() => setPickStatement(option)}
+                      className={pickStatement === option ? chipOn : chipOff}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(["Debit", "Credit"] as const).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      disabled={checked}
+                      onClick={() => setPickBalance(option)}
+                      className={pickBalance === option ? chipOn : chipOff}
+                    >
+                      {option} balance
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {!checked && (
+                <button
+                  type="button"
+                  disabled={!pickStatement || !pickBalance}
+                  onClick={checkClassification}
+                  className="mt-5 rounded-full gradient-primary px-6 py-2 text-sm text-white shadow-md hover:scale-[1.02] disabled:opacity-50"
+                >
+                  Check it
+                </button>
+              )}
+            </>
+          )}
+
+          {/* --- marked --- */}
+          {((kind === "journal" && grade && grade.verdict !== "empty") ||
+            (kind === "classification" && checked)) && (
+            <div className="mt-5 flex flex-col gap-4">
+              {kind === "journal" && grade && (
+                <>
+                  <p
+                    className={`text-lg ${
+                      grade.verdict === "correct" ? "text-success" : grade.verdict === "close" ? "text-assignment" : "text-exam"
+                    }`}
+                  >
+                    {grade.verdict === "correct"
+                      ? "Correct."
+                      : grade.verdict === "close"
+                        ? "Right accounts, wrong posting."
+                        : "Not right."}
+                  </p>
+                  {grade.verdict !== "correct" && (
+                    <ul className="flex flex-col gap-1.5">
+                      {grade.notes.map((note) => (
+                        <li key={note} className="text-sm leading-relaxed text-foreground">
+                          {note}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              )}
+
+              {kind === "classification" && (
+                <p
+                  className={`text-lg ${
+                    pickStatement === (current as ClassificationDrill).statement &&
+                    pickBalance === (current as ClassificationDrill).normalBalance
+                      ? "text-success"
+                      : "text-exam"
+                  }`}
+                >
+                  {pickStatement === (current as ClassificationDrill).statement &&
+                  pickBalance === (current as ClassificationDrill).normalBalance
+                    ? "Correct."
+                    : "Not right."}
+                </p>
+              )}
+
+              <div className="rounded-xl bg-background p-4">
                 {kind === "journal" ? (
                   <div className="flex flex-col gap-4">
                     {splitEntries((current as JournalDrill).entry).map((lines, i, all) => (
@@ -252,56 +467,78 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                     ))}
                   </div>
                 ) : (
-                  "statement" in current && (
-                    <dl className="flex flex-col gap-2 text-sm">
-                      <div className="flex gap-3">
-                        <dt className="w-32 shrink-0 text-muted">Statement</dt>
-                        <dd className="text-foreground">{current.statement}</dd>
-                      </div>
-                      <div className="flex gap-3">
-                        <dt className="w-32 shrink-0 text-muted">Section</dt>
-                        <dd className="text-foreground">{current.section}</dd>
-                      </div>
-                      <div className="flex gap-3">
-                        <dt className="w-32 shrink-0 text-muted">Normal balance</dt>
-                        <dd className="text-foreground">{current.normalBalance}</dd>
-                      </div>
-                    </dl>
-                  )
+                  <dl className="flex flex-col gap-2 text-sm">
+                    <div className="flex gap-3">
+                      <dt className="w-32 shrink-0 text-muted">Statement</dt>
+                      <dd className="text-foreground">{(current as ClassificationDrill).statement}</dd>
+                    </div>
+                    <div className="flex gap-3">
+                      <dt className="w-32 shrink-0 text-muted">Section</dt>
+                      <dd className="text-foreground">{(current as ClassificationDrill).section}</dd>
+                    </div>
+                    <div className="flex gap-3">
+                      <dt className="w-32 shrink-0 text-muted">Normal balance</dt>
+                      <dd className="text-foreground">{(current as ClassificationDrill).normalBalance}</dd>
+                    </div>
+                  </dl>
                 )}
               </div>
 
               {current.note && (
-                <p className="mt-3 text-sm leading-relaxed text-muted">{current.note}</p>
+                <p className="text-sm leading-relaxed text-muted">{current.note}</p>
               )}
 
-              <div className="mt-5 flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => grade("got")}
-                  className="rounded-full border border-success px-5 py-2.5 text-sm text-success hover:bg-success/10"
-                >
-                  I got it
-                </button>
-                <button
-                  type="button"
-                  onClick={() => grade("missed")}
-                  className="rounded-full border border-exam px-5 py-2.5 text-sm text-exam hover:bg-exam-light"
-                >
-                  I missed it
-                </button>
-              </div>
-            </>
+              <button
+                type="button"
+                onClick={goNext}
+                className="self-start rounded-full border border-border px-5 py-2.5 text-sm text-foreground hover:bg-surface-hover"
+              >
+                Next →
+              </button>
+            </div>
           )}
         </article>
       )}
 
       {(gotCount > 0 || missedCount > 0) && (
-        <p className="text-sm text-muted">
-          <span className="font-semibold text-success">{gotCount}</span> right ·{" "}
-          <span className="font-semibold text-exam">{missedCount}</span> to come back to
-          {missedCount > 0 && " — Monday's job is this pile, emptied."}
-        </p>
+        <div className="rounded-2xl border border-border bg-surface p-5">
+          <p className="text-sm text-foreground">
+            <span className="font-semibold text-success">{gotCount}</span> right ·{" "}
+            <span className="font-semibold text-exam">{missedCount}</span> missed
+          </p>
+
+          {weakSpots.length > 0 && (
+            <>
+              <p className="mt-4 mb-2 text-[10px] uppercase tracking-[0.2em] text-muted">
+                Where the misses are
+              </p>
+              <ul className="flex flex-col gap-1.5">
+                {weakSpots.map(([ch, v]) => (
+                  <li key={ch} className="flex items-center gap-3 text-sm">
+                    <span className="w-16 shrink-0 text-foreground">{ch}</span>
+                    <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-background">
+                      <span
+                        className="block h-full rounded-full bg-exam"
+                        style={{ width: `${Math.round((v.missed / v.total) * 100)}%` }}
+                      />
+                    </span>
+                    <span className="shrink-0 tabular-nums text-muted">
+                      {v.missed}/{v.total}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          <button
+            type="button"
+            onClick={copyResults}
+            className="mt-5 rounded-full border border-border px-4 py-2 text-xs text-muted hover:bg-surface-hover hover:text-foreground"
+          >
+            {copied ? "Copied — paste it to Claude" : "Copy my results"}
+          </button>
+        </div>
       )}
     </div>
   );
