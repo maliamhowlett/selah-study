@@ -14,7 +14,9 @@ import {
 import { gradeEntry, type GradeResult, type SubmittedLine } from "@/lib/study/grade-entry";
 import { useStoredValue, writeStoredValue } from "@/lib/study/local-store";
 
-type Result = "got" | "missed";
+// "shown" is asking to be taught, which is not the same as getting it wrong —
+// conflating them makes the whole record useless for deciding what to study.
+type Result = "got" | "missed" | "shown";
 type Kind = "journal" | "classification" | "statement";
 
 /** What was stored per drill. The verdict matters as much as the result:
@@ -41,6 +43,11 @@ function parseResults(raw: string | null): Record<string, Record_> {
   } catch {
     return {};
   }
+}
+
+/** Anything not answered correctly on the first go is still to be learned. */
+function needsWork(record?: Record_): boolean {
+  return record !== undefined && record.result !== "got";
 }
 
 const money = (n: number) =>
@@ -112,6 +119,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
   // Statement attempt state — a single typed number.
   const [figure, setFigure] = useState("");
 
+  const [revealed, setRevealed] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const raw = useStoredValue(STORE_KEY);
@@ -119,15 +127,15 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
 
   const deck = useMemo(() => {
     if (kind === "statement") {
-      return STATEMENT_DRILLS.filter((d) => !missedOnly || results[d.id]?.result === "missed");
+      return STATEMENT_DRILLS.filter((d) => !missedOnly || needsWork(results[d.id]));
     }
     if (kind === "classification") {
-      return CLASSIFICATION_DRILLS.filter((d) => !missedOnly || results[d.id]?.result === "missed");
+      return CLASSIFICATION_DRILLS.filter((d) => !missedOnly || needsWork(results[d.id]));
     }
     return JOURNAL_DRILLS.filter(
       (d) =>
         (chapter === "all" || d.chapter === chapter) &&
-        (!missedOnly || results[d.id]?.result === "missed"),
+        (!missedOnly || needsWork(results[d.id])),
     );
   }, [kind, chapter, missedOnly, results]);
 
@@ -136,6 +144,8 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
 
   const missedCount = Object.values(results).filter((r) => r.result === "missed").length;
   const gotCount = Object.values(results).filter((r) => r.result === "got").length;
+  const shownCount = Object.values(results).filter((r) => r.result === "shown").length;
+  const needWork = missedCount + shownCount;
 
   /** Where the misses are concentrated, so a weak chapter is visible as one. */
   const weakSpots = useMemo(() => {
@@ -145,7 +155,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
       if (!result) continue;
       const row = byChapter.get(drill.chapter) ?? { missed: 0, total: 0 };
       row.total += 1;
-      if (result.result === "missed") row.missed += 1;
+      if (result.result !== "got") row.missed += 1;
       byChapter.set(drill.chapter, row);
     }
     return [...byChapter.entries()]
@@ -166,6 +176,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     setPickBalance(null);
     setFigure("");
     setChecked(false);
+    setRevealed(false);
   };
 
   const goNext = () => {
@@ -212,6 +223,12 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     return Number.isFinite(typed) && Math.abs(typed - drill.answer) < 0.005;
   };
 
+  /** Reveal without being marked wrong for not knowing it yet. */
+  const showMe = () => {
+    setRevealed(true);
+    if (current) record(current.id, "shown", "shown");
+  };
+
   const copyResults = async () => {
     const lines = ["ACCT 20000 drill results", ""];
     for (const [label, list] of [
@@ -227,9 +244,11 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
         const mark =
           stored.result === "got"
             ? "correct"
-            : stored.verdict === "close"
-              ? "MISSED (right accounts, wrong posting)"
-              : "MISSED (wrong accounts / blank)";
+            : stored.result === "shown"
+              ? "SHOWN ME (didn't attempt)"
+              : stored.verdict === "close"
+                ? "WRONG (right accounts, wrong posting)"
+                : "WRONG";
         lines.push(`  [${mark}] ${d.chapter ?? ""} ${d.prompt ?? d.account ?? d.id}`.slice(0, 140));
       }
       lines.push("");
@@ -249,6 +268,16 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
   const chipOn = `rounded-full border px-3 py-1.5 text-xs ${accentBorder} ${accentTint} ${accentText}`;
   const inputClass =
     "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none";
+
+  const showMeButton = (
+    <button
+      type="button"
+      onClick={showMe}
+      className="rounded-full border border-border px-4 py-2 text-sm text-muted hover:bg-surface-hover hover:text-foreground"
+    >
+      I don&apos;t know this one — show me
+    </button>
+  );
 
   return (
     <div className="flex flex-col gap-5">
@@ -270,13 +299,13 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
         >
           Statement figures
         </button>
-        {missedCount > 0 && (
+        {needWork > 0 && (
           <button
             type="button"
             onClick={() => reset({ missedOnly: !missedOnly })}
             className={`ml-auto ${missedOnly ? chipOn : chipOff}`}
           >
-            Only what I missed ({missedCount})
+            Only what needs work ({needWork})
           </button>
         )}
       </div>
@@ -345,7 +374,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                   aria-label="Your answer"
                   className={`${inputClass} max-w-[12rem] text-right tabular-nums`}
                 />
-                {!checked && (
+                {!checked && !revealed && (
                   <button
                     type="button"
                     disabled={!figure.trim()}
@@ -356,6 +385,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                   </button>
                 )}
               </div>
+              {!checked && !revealed && <div className="mt-3">{showMeButton}</div>}
             </>
           ) : kind === "journal" ? (
             <>
@@ -426,7 +456,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                 </table>
               </div>
 
-              {(grade === null || grade.verdict === "empty") && (
+              {(grade === null || grade.verdict === "empty") && !revealed && (
                 <div className="mt-3 flex flex-wrap gap-3">
                   <button
                     type="button"
@@ -442,6 +472,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                   >
                     Check it
                   </button>
+                  {showMeButton}
                 </div>
               )}
             </>
@@ -481,24 +512,28 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                 </div>
               </div>
 
-              {!checked && (
-                <button
-                  type="button"
-                  disabled={!pickStatement || !pickBalance}
-                  onClick={checkClassification}
-                  className="mt-5 rounded-full gradient-primary px-6 py-2 text-sm text-white shadow-md hover:scale-[1.02] disabled:opacity-50"
-                >
-                  Check it
-                </button>
+              {!checked && !revealed && (
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    disabled={!pickStatement || !pickBalance}
+                    onClick={checkClassification}
+                    className="rounded-full gradient-primary px-6 py-2 text-sm text-white shadow-md hover:scale-[1.02] disabled:opacity-50"
+                  >
+                    Check it
+                  </button>
+                  {showMeButton}
+                </div>
               )}
             </>
           )}
 
           {/* --- marked --- */}
-          {((kind === "journal" && grade && grade.verdict !== "empty") ||
+          {(revealed ||
+            (kind === "journal" && grade && grade.verdict !== "empty") ||
             ((kind === "classification" || kind === "statement") && checked)) && (
             <div className="mt-5 flex flex-col gap-4">
-              {kind === "journal" && grade && (
+              {!revealed && kind === "journal" && grade && (
                 <>
                   <p
                     className={`text-lg ${
@@ -523,7 +558,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                 </>
               )}
 
-              {kind === "statement" && (
+              {!revealed && kind === "statement" && (
                 <p className={`text-lg ${statementRight() ? "text-success" : "text-exam"}`}>
                   {statementRight()
                     ? "Correct."
@@ -531,7 +566,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                 </p>
               )}
 
-              {kind === "classification" && (
+              {!revealed && kind === "classification" && (
                 <p
                   className={`text-lg ${
                     pickStatement === (current as ClassificationDrill).statement &&
@@ -593,6 +628,12 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                 </p>
               )}
 
+              {revealed && (
+                <p className="text-sm text-muted">
+                  Filed as one to come back to, not as a wrong answer.
+                </p>
+              )}
+
               <button
                 type="button"
                 onClick={goNext}
@@ -609,7 +650,13 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
         <div className="rounded-2xl border border-border bg-surface p-5">
           <p className="text-sm text-foreground">
             <span className="font-semibold text-success">{gotCount}</span> right ·{" "}
-            <span className="font-semibold text-exam">{missedCount}</span> missed
+            <span className="font-semibold text-exam">{missedCount}</span> wrong
+            {shownCount > 0 && (
+              <>
+                {" · "}
+                <span className="font-semibold text-assignment">{shownCount}</span> to learn
+              </>
+            )}
           </p>
 
           {weakSpots.length > 0 && (
