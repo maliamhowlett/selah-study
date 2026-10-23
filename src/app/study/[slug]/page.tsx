@@ -116,6 +116,64 @@ export default async function CourseStudyPage({
               accentTint={course.tint}
               modes={
                 [
+                  plan.triage && {
+                    id: "triage",
+                    label: "Short on time",
+                    blurb:
+                      "Ranked by marks per minute, highest first. Work down the list and stop when you run out of time — whatever you reach will be the most valuable thing left.",
+                    content: (
+                      <div className="flex flex-col gap-3">
+                        <p className="max-w-2xl rounded-2xl border border-border bg-surface p-4 text-sm leading-relaxed text-foreground">
+                          Everything here together is{" "}
+                          <span className={`font-semibold ${course.text}`}>
+                            {plan.triage.reduce((n, t) => n + t.marks, 0)} of the 40 marks
+                          </span>{" "}
+                          in about{" "}
+                          {Math.round(
+                            (plan.triage.reduce((n, t) => n + t.minutes, 0) / 60) * 10,
+                          ) / 10}{" "}
+                          hours. None of it needs a journal entry, and most of it needs no
+                          calculation at all.
+                        </p>
+
+                        {plan.triage.map((item, i) => (
+                          <article
+                            key={item.what}
+                            className="flex gap-4 rounded-2xl border border-border bg-surface p-4"
+                          >
+                            <span className="mt-0.5 w-6 shrink-0 text-sm tabular-nums text-muted">
+                              {i + 1}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-foreground">{item.what}</p>
+                              <p className="mt-1 text-sm leading-relaxed text-muted">
+                                {item.why}
+                              </p>
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <p className={`text-lg tabular-nums ${course.text}`}>
+                                {item.marks}
+                              </p>
+                              <p className="text-[10px] uppercase tracking-wider text-muted">
+                                {item.marks === 1 ? "mark" : "marks"}
+                              </p>
+                              <p className="mt-1 text-xs tabular-nums text-muted">
+                                {item.minutes}m
+                              </p>
+                            </div>
+                          </article>
+                        ))}
+
+                        <p className="max-w-2xl text-sm leading-relaxed text-muted">
+                          What is deliberately not on this list: the FIFO and LIFO
+                          computations, the allowance and aging calculations, the
+                          multi-step income statement, and recording purchases and sales.
+                          Those are the remaining 15 marks and they cost far more time
+                          each. Get to them only once the list above is solid.
+                        </p>
+                      </div>
+                    ),
+                  },
                   {
                     id: "plan",
                     label: "The plan",

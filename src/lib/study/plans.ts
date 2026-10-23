@@ -27,6 +27,19 @@ export interface StudyTopic {
   traps: string[];
 }
 
+/**
+ * One item in the time-poor ordering. Ranked by marks per minute, because
+ * when there isn't time for everything the question stops being "what should
+ * I learn" and becomes "what do I learn first".
+ */
+export interface TriageItem {
+  what: string;
+  marks: number;
+  minutes: number;
+  /** Why it is this cheap — usually "one rule" or "no calculation". */
+  why: string;
+}
+
 /** One line of the instructor's own exam blueprint. */
 export interface BlueprintRow {
   /** Learning objective number, blank when a row continues the one above. */
@@ -65,6 +78,8 @@ export interface ExamPlan {
   situation: string[];
   /** The instructor's published question counts, where there are any. */
   blueprint?: BlueprintChapter[];
+  /** Highest-return work first, for when time is short. */
+  triage?: TriageItem[];
   topics: StudyTopic[];
   days: StudyDay[];
   problems: PracticeProblem[];
@@ -175,6 +190,87 @@ const ACCT_BLUEPRINT: BlueprintChapter[] = [
   },
 ];
 
+const ACCT_TRIAGE: TriageItem[] = [
+  {
+    what: "Internal control: the definitions and the components",
+    marks: 3,
+    minutes: 20,
+    why: "The biggest single topic on the paper and pure memorisation — no calculation, no entries. Ch. 4 packet.",
+  },
+  {
+    what: "Inventory method effects in rising prices",
+    marks: 2,
+    minutes: 10,
+    why: "One rule covers both marks: FIFO gives higher ending inventory and higher net income, LIFO gives higher COGS and lower tax.",
+  },
+  {
+    what: "Which intangible is which, and which one never amortises",
+    marks: 2,
+    minutes: 15,
+    why: "Patent, copyright, trademark, franchise, goodwill. Flashcard material — goodwill is the one that doesn't amortise.",
+  },
+  {
+    what: "Capitalise or expense a subsequent expenditure",
+    marks: 2,
+    minutes: 15,
+    why: "One rule: extends life, adds capacity, or gets it ready to use → capitalise. Routine upkeep → expense.",
+  },
+  {
+    what: "Depreciation: straight-line and double-declining balance",
+    marks: 2,
+    minutes: 20,
+    why: "Two formulas. SL subtracts residual first, DDB ignores it. Units-of-production is not on the blueprint.",
+  },
+  {
+    what: "Bank reconciliation: which side, and which needs an entry",
+    marks: 2,
+    minutes: 20,
+    why: "Bank side: outstanding checks and deposits in transit, no entry ever. Book side: everything else, entry always.",
+  },
+  {
+    what: "Net receivables, net revenues, cash and equivalents",
+    marks: 3,
+    minutes: 15,
+    why: "Three subtractions. Drill tab → Statement figures.",
+  },
+  {
+    what: "Gain or loss on a disposal",
+    marks: 1,
+    minutes: 10,
+    why: "Cash received against BOOK VALUE, never cost. Depreciate to the sale date first.",
+  },
+  {
+    what: "Notes receivable interest",
+    marks: 1,
+    minutes: 5,
+    why: "Principal × rate × months/12. The rate is always annual.",
+  },
+  {
+    what: "Lump-sum purchase allocation",
+    marks: 1,
+    minutes: 10,
+    why: "Split by relative fair value. One percentage, one multiplication.",
+  },
+  {
+    what: "Which inventory method suits which business, FOB terms, merchandisers",
+    marks: 2,
+    minutes: 10,
+    why: "Definitions. FOB shipping point means title passes when it leaves the seller.",
+  },
+  {
+    what: "What the allowance account is, and what a write-off does",
+    marks: 2,
+    minutes: 10,
+    why: "Contra-asset, credit balance. A write-off changes neither net receivables nor net income.",
+  },
+  {
+    what: "Executives certify the statements; cash appears on two statements",
+    marks: 2,
+    minutes: 5,
+    why: "Two facts, two marks.",
+  },
+];
+
 const ACCT_EXAM_2: ExamPlan = {
   label: "Exam 2",
   date: "2026-10-27",
@@ -183,6 +279,7 @@ const ACCT_EXAM_2: ExamPlan = {
   covers: "Chapters 4–7 (Module 2)",
   weight: "20% of your grade",
   blueprint: ACCT_BLUEPRINT,
+  triage: ACCT_TRIAGE,
   situation: [
     "Exam 2 is worth 20%, more than Exam 1's 15% — and Exam 3 is another 25%. " +
       "Most of the exam weight in this course is still ahead of you.",
