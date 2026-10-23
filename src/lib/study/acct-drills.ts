@@ -728,3 +728,257 @@ export const STATEMENT_DRILLS: StatementDrill[] = [
       "A cash equivalent matures in THREE MONTHS OR LESS, so the 6-month CD is a short-term investment instead. Receivables are not cash, and stamps are supplies.",
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Account vocabulary.
+//
+// The full journal-entry drills ask two things at once: which accounts, and
+// which side. When almost every miss comes back as "wrong accounts" rather
+// than "wrong posting", the second question is not the problem and asking both
+// at once just hides that.
+//
+// These ask one account at a time. It is a vocabulary problem, and vocabulary
+// is the fastest kind of gap to close.
+// ---------------------------------------------------------------------------
+
+export interface AccountDrill {
+  id: string;
+  chapter: string;
+  /** The situation in ordinary words, never naming the account. */
+  situation: string;
+  account: string;
+  side: "Debit" | "Credit";
+  why?: string;
+}
+
+export const ACCOUNT_DRILLS: AccountDrill[] = [
+  // Ch. 1–3 — the ones underneath everything else
+  {
+    id: "a-prepaid",
+    chapter: "Ch. 1–3",
+    situation: "The company pays cash now for twelve months of insurance it hasn't used yet.",
+    account: "Prepaid Insurance",
+    side: "Debit",
+    why: "Unused insurance is still something of value you hold — an asset. It only becomes an expense as the months pass.",
+  },
+  {
+    id: "a-insurance-exp",
+    chapter: "Ch. 1–3",
+    situation: "One month of that insurance has now been used up.",
+    account: "Insurance Expense",
+    side: "Debit",
+    why: "The used-up portion moves out of the asset and into an expense.",
+  },
+  {
+    id: "a-salaries-payable",
+    chapter: "Ch. 1–3",
+    situation: "Employees have earned wages the company hasn't paid yet. What do you credit?",
+    account: "Salaries Payable",
+    side: "Credit",
+    why: "Owed but unpaid is a liability. The matching debit is Salaries Expense.",
+  },
+  {
+    id: "a-salaries-expense",
+    chapter: "Ch. 1–3",
+    situation: "Same situation — employees earned wages not yet paid. What do you debit?",
+    account: "Salaries Expense",
+    side: "Debit",
+    why: "The cost belongs to the period the work was done in, not the period it gets paid in.",
+  },
+  {
+    id: "a-deferred",
+    chapter: "Ch. 1–3",
+    situation: "A customer pays cash up front for work the company hasn't done yet.",
+    account: "Deferred Revenue",
+    side: "Credit",
+    why: "A liability despite the word revenue — you owe the work, not the money.",
+  },
+  {
+    id: "a-ar",
+    chapter: "Ch. 1–3",
+    situation: "The company finishes a job and the customer will pay next month.",
+    account: "Accounts Receivable",
+    side: "Debit",
+    why: "A promise to be paid is an asset.",
+  },
+  {
+    id: "a-service-rev",
+    chapter: "Ch. 1–3",
+    situation: "That job is complete, so the company has earned the income.",
+    account: "Service Revenue",
+    side: "Credit",
+    why: "Revenue increases with a credit. Earned is what matters, not paid.",
+  },
+
+  // Ch. 4
+  {
+    id: "a-service-fee",
+    chapter: "Ch. 4",
+    situation: "The bank takes a monthly fee out of the account.",
+    account: "Service Fee Expense",
+    side: "Debit",
+    why: "A cost of banking. Book-side reconciling item, so it needs an entry.",
+  },
+  {
+    id: "a-nsf",
+    chapter: "Ch. 4",
+    situation: "A customer's check bounces. What comes back onto the books?",
+    account: "Accounts Receivable",
+    side: "Debit",
+    why: "They still owe you — the receivable comes back to life, and Cash is credited.",
+  },
+  {
+    id: "a-interest-rev",
+    chapter: "Ch. 4",
+    situation: "The bank pays the company interest on its balance.",
+    account: "Interest Revenue",
+    side: "Credit",
+  },
+  {
+    id: "a-petty",
+    chapter: "Ch. 4",
+    situation: "The company sets aside a small amount of cash in the office for minor costs.",
+    account: "Petty Cash",
+    side: "Debit",
+    why: "Only touched when the fund is set up or resized — never when it is replenished.",
+  },
+
+  // Ch. 5
+  {
+    id: "a-aua",
+    chapter: "Ch. 5",
+    situation: "The company estimates how much of its receivables will never be collected.",
+    account: "Allowance for Uncollectible Accounts",
+    side: "Credit",
+    why: "AUA — a contra-asset sitting against Accounts Receivable, so it carries a credit.",
+  },
+  {
+    id: "a-bde",
+    chapter: "Ch. 5",
+    situation: "The cost of making that estimate, on the income statement.",
+    account: "Bad Debt Expense",
+    side: "Debit",
+    why: "BDE. Expenses increase with debits.",
+  },
+  {
+    id: "a-sales-discount",
+    chapter: "Ch. 5",
+    situation: "A customer pays early and takes 2% off under 2/10, n/30.",
+    account: "Sales Discounts",
+    side: "Debit",
+    why: "Contra-revenue — it reduces revenue, so it carries a debit.",
+  },
+  {
+    id: "a-sales-returns",
+    chapter: "Ch. 5",
+    situation: "A customer sends goods back because they were defective.",
+    account: "Sales Returns and Allowances",
+    side: "Debit",
+    why: "Also contra-revenue. You don't reverse Sales Revenue directly.",
+  },
+  {
+    id: "a-notes-receivable",
+    chapter: "Ch. 5",
+    situation: "Someone signs a formal written promise to repay the company with interest.",
+    account: "Notes Receivable",
+    side: "Debit",
+  },
+  {
+    id: "a-interest-receivable",
+    chapter: "Ch. 5",
+    situation: "Interest on that note has been earned but not yet received.",
+    account: "Interest Receivable",
+    side: "Debit",
+    why: "Earned and owed to you — an asset, same logic as Accounts Receivable.",
+  },
+
+  // Ch. 6
+  {
+    id: "a-inventory",
+    chapter: "Ch. 6",
+    situation: "The company buys goods intending to resell them.",
+    account: "Inventory",
+    side: "Debit",
+    why: "Under perpetual there is no Purchases account — it goes straight to Inventory.",
+  },
+  {
+    id: "a-cogs",
+    chapter: "Ch. 6",
+    situation: "Those goods are sold, and their cost has to be recorded.",
+    account: "Cost of Goods Sold",
+    side: "Debit",
+    why: "COGS. The second of the two entries every perpetual sale needs.",
+  },
+  {
+    id: "a-ap",
+    chapter: "Ch. 6",
+    situation: "The company owes a supplier for inventory bought on account.",
+    account: "Accounts Payable",
+    side: "Credit",
+  },
+  {
+    id: "a-selling-expense",
+    chapter: "Ch. 6",
+    situation: "The company pays to ship goods OUT to a customer.",
+    account: "Selling Expense",
+    side: "Debit",
+    why: "Freight-out is an expense and never touches Inventory. Freight-IN does.",
+  },
+
+  // Ch. 7
+  {
+    id: "a-equipment",
+    chapter: "Ch. 7",
+    situation: "A machine is bought, including its freight and installation.",
+    account: "Equipment",
+    side: "Debit",
+    why: "Everything needed to get it ready for use is capitalized into one figure.",
+  },
+  {
+    id: "a-accum-dep",
+    chapter: "Ch. 7",
+    situation: "All the depreciation recorded on an asset since it was bought.",
+    account: "Accumulated Depreciation",
+    side: "Credit",
+    why: "A contra-asset. You never credit the asset account itself for depreciation.",
+  },
+  {
+    id: "a-dep-expense",
+    chapter: "Ch. 7",
+    situation: "This year's share of an asset's cost, on the income statement.",
+    account: "Depreciation Expense",
+    side: "Debit",
+    why: "Easy to confuse with Accumulated Depreciation — that one is the balance sheet contra account.",
+  },
+  {
+    id: "a-patent",
+    chapter: "Ch. 7",
+    situation: "Legal and registration fees paid to protect an invention.",
+    account: "Patent",
+    side: "Debit",
+    why: "Only the fees are capitalized. The R&D that created it was expensed as incurred.",
+  },
+  {
+    id: "a-repairs",
+    chapter: "Ch. 7",
+    situation: "Routine maintenance on a delivery truck that doesn't extend its life.",
+    account: "Repairs and Maintenance Expense",
+    side: "Debit",
+    why: "Ordinary upkeep is expensed however large the bill.",
+  },
+  {
+    id: "a-gain",
+    chapter: "Ch. 7",
+    situation: "An asset is sold for more than its book value.",
+    account: "Gain on Sale of Equipment",
+    side: "Credit",
+    why: "Below operating income on the income statement, so it doesn't change operating income.",
+  },
+  {
+    id: "a-loss",
+    chapter: "Ch. 7",
+    situation: "An asset is sold for less than its book value.",
+    account: "Loss on Sale of Equipment",
+    side: "Debit",
+  },
+];

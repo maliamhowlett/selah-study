@@ -91,7 +91,7 @@ const ALIAS_LOOKUP: Record<string, string> = Object.fromEntries(
   ]),
 );
 
-function normalize(raw: string): string {
+export function normalizeAccount(raw: string): string {
   const text = singularise(clean(raw));
   return ALIAS_LOOKUP[text] ?? text;
 }
@@ -116,7 +116,7 @@ interface Posting {
 
 function expectedPostings(entry: EntryLine[]): Posting[] {
   return entry.map((line) => ({
-    account: normalize(line.account),
+    account: normalizeAccount(line.account),
     label: line.account,
     side: line.debit !== undefined ? "debit" : "credit",
     amount: (line.debit ?? line.credit)!,
@@ -126,7 +126,7 @@ function expectedPostings(entry: EntryLine[]): Posting[] {
 function submittedPostings(lines: SubmittedLine[]): Posting[] {
   const out: Posting[] = [];
   for (const line of lines) {
-    const account = normalize(line.account);
+    const account = normalizeAccount(line.account);
     if (!account) continue;
     const debit = money(line.debit);
     const credit = money(line.credit);

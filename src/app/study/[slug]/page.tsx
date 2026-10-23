@@ -247,7 +247,7 @@ export default async function CourseStudyPage({
                     id: "drill",
                     label: "Drill",
                     blurb:
-                      "Three kinds, all marked for you. Journal entries: type it and get told exactly what's wrong — wrong side, wrong amount, missing line. Where does it go: which statement and which normal balance. Statement figures: compute one subtotal from a list of accounts, which is how the exam asks it rather than making you build the whole statement. Only your first attempt counts.",
+                      "Four kinds, all marked for you. Start with Which account if entries aren't landing — it asks for one account at a time instead of a whole entry. Then Journal entries, which tells you exactly what's wrong: wrong side, wrong amount, missing line. Where does it go covers statement and normal balance; Statement figures is one subtotal from a list, the way the exam asks it. Abbreviations are fine — AUA and BDE both work. Only your first attempt counts.",
                     content: (
                       <DrillRunner
                         accentText={course.text}

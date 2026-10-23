@@ -4,21 +4,23 @@ import { useMemo, useState } from "react";
 import {
   CLASSIFICATION_DRILLS,
   DRILL_CHAPTERS,
+  ACCOUNT_DRILLS,
   JOURNAL_DRILLS,
   STATEMENT_DRILLS,
+  type AccountDrill,
   type ClassificationDrill,
   type EntryLine,
   type JournalDrill,
   type StatementDrill,
 } from "@/lib/study/acct-drills";
-import { gradeEntry, type GradeResult, type SubmittedLine } from "@/lib/study/grade-entry";
+import { gradeEntry, normalizeAccount, type GradeResult, type SubmittedLine } from "@/lib/study/grade-entry";
 import { useStoredValue, writeStoredValue } from "@/lib/study/local-store";
 import AskTutor from "./AskTutor";
 
 // "shown" is asking to be taught, which is not the same as getting it wrong —
 // conflating them makes the whole record useless for deciding what to study.
 type Result = "got" | "missed" | "shown";
-type Kind = "journal" | "classification" | "statement";
+type Kind = "account" | "journal" | "classification" | "statement";
 
 /** What was stored per drill. The verdict matters as much as the result:
  * "close" means the accounts were right and the posting wasn't, which is a
@@ -120,6 +122,10 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
   // Statement attempt state — a single typed number.
   const [figure, setFigure] = useState("");
 
+  // Account-vocabulary attempt state.
+  const [guess, setGuess] = useState("");
+  const [guessSide, setGuessSide] = useState<string | null>(null);
+
   const [revealed, setRevealed] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -127,6 +133,13 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
   const results = useMemo(() => parseResults(raw), [raw]);
 
   const deck = useMemo(() => {
+    if (kind === "account") {
+      return ACCOUNT_DRILLS.filter(
+        (d) =>
+          (chapter === "all" || d.chapter === chapter) &&
+          (!missedOnly || needsWork(results[d.id])),
+      );
+    }
     if (kind === "statement") {
       return STATEMENT_DRILLS.filter((d) => !missedOnly || needsWork(results[d.id]));
     }
@@ -176,6 +189,8 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     setPickStatement(null);
     setPickBalance(null);
     setFigure("");
+    setGuess("");
+    setGuessSide(null);
     setChecked(false);
     setRevealed(false);
   };
@@ -224,6 +239,21 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     return Number.isFinite(typed) && Math.abs(typed - drill.answer) < 0.005;
   };
 
+  const accountRight = () => {
+    const drill = current as AccountDrill;
+    return (
+      normalizeAccount(guess) === normalizeAccount(drill.account) &&
+      guessSide === drill.side
+    );
+  };
+
+  const checkAccount = () => {
+    const drill = current as AccountDrill;
+    setChecked(true);
+    const right = accountRight();
+    record(drill.id, right ? "got" : "missed", right ? "correct" : "wrong");
+  };
+
   /** Reveal without being marked wrong for not knowing it yet. */
   const showMe = () => {
     setRevealed(true);
@@ -235,6 +265,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     for (const [label, list] of [
       ["Journal entries", JOURNAL_DRILLS as { id: string; chapter?: string; prompt?: string; account?: string }[]],
       ["Account classification", CLASSIFICATION_DRILLS as { id: string; chapter?: string; prompt?: string; account?: string }[]],
+      ["Which account", ACCOUNT_DRILLS.map((d) => ({ id: d.id, chapter: d.chapter, prompt: d.situation })) as { id: string; chapter?: string; prompt?: string; account?: string }[]],
       ["Statement subtotals", STATEMENT_DRILLS.map((d) => ({ id: d.id, chapter: d.chapter, prompt: d.question })) as { id: string; chapter?: string; prompt?: string; account?: string }[]],
     ] as const) {
       const done = list.filter((d) => results[d.id]);
@@ -276,6 +307,8 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
       ? `Journal entry drill (${(current as JournalDrill).chapter}): ${(current as JournalDrill).prompt}\nCorrect entry: ${(current as JournalDrill).entry
           .map((l) => `${l.account} ${l.debit !== undefined ? `debit ${l.debit}` : `credit ${l.credit}`}`)
           .join("; ")}`
+      : kind === "account"
+        ? `Which-account drill. Situation: ${(current as AccountDrill).situation}\nAnswer: ${(current as AccountDrill).account}, ${(current as AccountDrill).side}.`
       : kind === "statement"
         ? `Statement figure drill. Data:\n${(current as StatementDrill).scenario}\nQuestion: ${(current as StatementDrill).question}\nAnswer: ${(current as StatementDrill).answer}`
         : `Account classification drill. Account: ${(current as ClassificationDrill).account}. It belongs on the ${(current as ClassificationDrill).statement}, in ${(current as ClassificationDrill).section}, normal balance ${(current as ClassificationDrill).normalBalance}.`;
@@ -293,6 +326,9 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center gap-2">
+        <button type="button" onClick={() => reset({ kind: "account" })} className={kind === "account" ? chipOn : chipOff}>
+          Which account
+        </button>
         <button type="button" onClick={() => reset({ kind: "journal" })} className={kind === "journal" ? chipOn : chipOff}>
           Journal entries
         </button>
@@ -321,7 +357,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
         )}
       </div>
 
-      {kind === "journal" && (
+      {(kind === "journal" || kind === "account") && (
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => reset({ chapter: "all" })} className={chapter === "all" ? chipOn : chipOff}>
             All chapters
@@ -355,7 +391,9 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
         <article className="rounded-2xl border border-border bg-surface p-6">
           <div className="mb-4 flex items-baseline justify-between gap-3">
             <span className={`text-xs uppercase tracking-[0.15em] ${accentText}`}>
-              {kind === "journal"
+              {kind === "account"
+                ? `${(current as AccountDrill).chapter} · which account`
+                : kind === "journal"
                 ? (current as JournalDrill).chapter
                 : kind === "statement"
                   ? `${(current as StatementDrill).chapter} · statement figure`
@@ -366,7 +404,51 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
             </span>
           </div>
 
-          {kind === "statement" ? (
+          {kind === "account" ? (
+            <>
+              <p className="leading-relaxed text-foreground">
+                {(current as AccountDrill).situation}
+              </p>
+              <p className="mt-2 text-sm text-muted">
+                Name the account, and say which side it goes on.
+              </p>
+
+              <input
+                value={guess}
+                disabled={checked || revealed}
+                onChange={(e) => setGuess(e.target.value)}
+                placeholder="Account name"
+                aria-label="Account name"
+                className={`${inputClass} mt-4 max-w-sm`}
+              />
+              <div className="mt-3 flex flex-wrap gap-2">
+                {(["Debit", "Credit"] as const).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    disabled={checked || revealed}
+                    onClick={() => setGuessSide(option)}
+                    className={guessSide === option ? chipOn : chipOff}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+              {!checked && !revealed && (
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    disabled={!guess.trim() || !guessSide}
+                    onClick={checkAccount}
+                    className="rounded-full gradient-primary px-6 py-2 text-sm text-white shadow-md hover:scale-[1.02] disabled:opacity-50"
+                  >
+                    Check it
+                  </button>
+                  {showMeButton}
+                </div>
+              )}
+            </>
+          ) : kind === "statement" ? (
             <>
               <pre className="overflow-x-auto whitespace-pre rounded-xl bg-background p-4 font-mono text-[13px] leading-relaxed text-foreground">
                 {(current as StatementDrill).scenario}
@@ -542,7 +624,8 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
           {/* --- marked --- */}
           {(revealed ||
             (kind === "journal" && grade && grade.verdict !== "empty") ||
-            ((kind === "classification" || kind === "statement") && checked)) && (
+            ((kind === "classification" || kind === "statement" || kind === "account") &&
+              checked)) && (
             <div className="mt-5 flex flex-col gap-4">
               {!revealed && kind === "journal" && grade && (
                 <>
@@ -567,6 +650,12 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                     </ul>
                   )}
                 </>
+              )}
+
+              {!revealed && kind === "account" && (
+                <p className={`text-lg ${accountRight() ? "text-success" : "text-exam"}`}>
+                  {accountRight() ? "Correct." : "Not right."}
+                </p>
               )}
 
               {!revealed && kind === "statement" && (
@@ -594,7 +683,17 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
               )}
 
               <div className="rounded-xl bg-background p-4">
-                {kind === "statement" ? (
+                {kind === "account" ? (
+                  <p className="text-sm">
+                    <span className="text-foreground">
+                      {(current as AccountDrill).account}
+                    </span>
+                    <span className="text-muted">
+                      {" — "}
+                      {(current as AccountDrill).side.toLowerCase()}
+                    </span>
+                  </p>
+                ) : kind === "statement" ? (
                   <pre className="overflow-x-auto whitespace-pre font-mono text-[13px] leading-relaxed text-foreground">
                     {(current as StatementDrill).working}
                   </pre>
@@ -629,15 +728,17 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                 )}
               </div>
 
-              {(kind === "statement"
-                ? (current as StatementDrill).trap
-                : (current as JournalDrill | ClassificationDrill).note) && (
-                <p className="text-sm leading-relaxed text-muted">
-                  {kind === "statement"
+              {(() => {
+                const aside =
+                  kind === "statement"
                     ? (current as StatementDrill).trap
-                    : (current as JournalDrill | ClassificationDrill).note}
-                </p>
-              )}
+                    : kind === "account"
+                      ? (current as AccountDrill).why
+                      : (current as JournalDrill | ClassificationDrill).note;
+                return aside ? (
+                  <p className="text-sm leading-relaxed text-muted">{aside}</p>
+                ) : null;
+              })()}
 
               {revealed && (
                 <p className="text-sm text-muted">
