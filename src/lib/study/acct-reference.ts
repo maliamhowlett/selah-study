@@ -71,13 +71,21 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
       },
       {
         point:
-          "Bank side: outstanding checks (subtract) and deposits in transit (add). These NEVER get a journal entry.",
+          "Bank side: deposits outstanding (add), checks outstanding (subtract), and BANK errors (either way). None of these ever gets a journal entry.",
+        detail:
+          "Deposits outstanding and deposits in transit are the same thing — the practice exam calls them outstanding deposits.",
       },
       {
         point:
-          "Book side: service charges, NSF checks, bank collections, interest earned, and your own errors. These ALWAYS get a journal entry.",
+          "Book side: service charges, NSF checks, bank collections, interest earned, and COMPANY errors. Every one of these needs a journal entry.",
         detail:
-          "Quick test: if the bank already knew and you didn't, it is a book-side item and needs an entry.",
+          "Two tests. Whose error was it? — whoever made it is the side that gets corrected. And: did the bank already know while you didn't? — then it is yours to record.",
+      },
+      {
+        point:
+          "You only journalise your own side. A bank error is the bank's to fix, so it adjusts the bank column and nothing else.",
+        detail:
+          "The practice exam asks this in reverse: the bank recorded a $1,500 deposit correctly and the bookkeeper wrote $1,400, so the COMPANY balance is the one adjusted.",
       },
       {
         point: "Both sides must finish at the same adjusted balance.",

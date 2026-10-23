@@ -225,7 +225,7 @@ const ACCT_TRIAGE: TriageItem[] = [
     what: "Bank reconciliation: which side, and which needs an entry",
     marks: 2,
     minutes: 20,
-    why: "Bank side: outstanding checks and deposits in transit, no entry ever. Book side: everything else, entry always.",
+    why: "Bank side: deposits outstanding, checks outstanding, bank errors — no entry ever. Book side: service charges, NSF, collections, interest, your own errors — entry always.",
   },
   {
     what: "Net receivables, net revenues, cash and equivalents",
