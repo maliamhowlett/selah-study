@@ -13,6 +13,8 @@ export interface ReferencePoint {
   point: string;
   /** Detail, an example, or the mistake it prevents. */
   detail?: string;
+  /** Items that need to be seen as a set rather than read as a sentence. */
+  list?: { term: string; gloss: string }[];
 }
 
 export interface ReferenceSection {
@@ -28,32 +30,60 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
   {
     id: "r-internal-control",
     chapter: "Ch. 4",
-    title: "Internal control",
-    questions: 3,
+    title: "Internal control and Sarbanes-Oxley",
+    questions: 4,
     points: [
       {
         point:
-          "Five components: control environment, risk assessment, control activities, information and communication, monitoring.",
+          "The pyramid has FOUR layers, with Information & Communication running up the side.",
         detail:
-          "Control ACTIVITIES are the policies and procedures themselves — approvals, authorizations, separation of duties. Risk assessment decides what needs controlling; monitoring checks the controls still work.",
+          "Bottom to top: Control Environment → Risk Assessment → Control Activities → Monitoring. Information & Communication is drawn alongside rather than stacked because it cuts across all four — it still counts as a component, which is why the framework is usually described as five.",
+      },
+      {
+        point: "The four layers, bottom to top, with what each one is for:",
+        list: [
+          { term: "Control environment", gloss: "tone" },
+          { term: "Risk assessment", gloss: "threats" },
+          { term: "Control activities", gloss: "mitigation of threats" },
+          { term: "Monitoring", gloss: "reporting / accountability" },
+        ],
+        detail:
+          "These are your own margin notes from the packet, and they are the fastest way to hold the four apart under time pressure.",
+      },
+      {
+        point:
+          "Control ACTIVITIES are the policies and procedures that carry out management's directives.",
+        detail:
+          "Authorizations, reconciliations, separation of duties. This exact wording is question 1 on your practice exam.",
+      },
+      {
+        point:
+          "Internal control is a company's plans to minimize THEFT and enhance the ACCURACY of accounting information.",
+        detail: "Those are the two blanks you filled in on page 2 of the packet.",
+      },
+      {
+        point: "Section 404 of Sarbanes-Oxley requires internal controls for public corporations.",
+        detail: "Corporate executives are responsible for them. Investors value them as a reason to rely on the financials.",
+      },
+      {
+        point:
+          "Sarbanes-Oxley (2002): the CEO and CFO must personally certify the financial statements.",
+        detail:
+          "It also reduced conflicts of interest, set a 7-year workpaper retention rule, and created the PCAOB. It applies to companies filing with the SEC.",
       },
       {
         point: "Preventive controls stop problems. Detective controls find them afterwards.",
         detail:
-          "Preventive: separation of duties, physical controls, proper authorization. Detective: reconciliations, performance reviews, audits. Exam questions usually ask which one a reconciliation is — it is detective.",
+          "Preventive: separation of duties, physical controls, proper authorization. Detective: reconciliations. Exam questions usually ask which one a reconciliation is — it is detective.",
       },
       {
         point: "Separation of duties means nobody both authorizes and records the same transaction.",
         detail:
-          "One person handling cash and also making the deposit is the classic weakness. So is one employee who both approves and signs checks.",
+          "One person handling cash and also making the deposit is the classic weakness, as is one employee who both approves and signs checks.",
       },
       {
-        point: "Executives must certify the financial statements.",
-        detail: "Sarbanes-Oxley. One question, one fact.",
-      },
-      {
-        point: "Internal control cannot eliminate fraud — only reduce it.",
-        detail: "Collusion and management override defeat any system. 'Reasonable assurance', never a guarantee.",
+        point: "Internal control reduces fraud; it cannot eliminate it.",
+        detail: "Collusion and management override defeat any system. Reasonable assurance, never a guarantee.",
       },
     ],
   },

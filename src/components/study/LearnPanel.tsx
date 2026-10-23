@@ -76,6 +76,19 @@ export default function LearnPanel({ accentText, accentBorder, accentTint }: Pro
                       <span aria-hidden="true" className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${accentBorder.replace("border-", "bg-")}`} />
                       <div className="min-w-0 flex-1">
                         <p className="leading-relaxed text-foreground">{p.point}</p>
+                        {p.list && (
+                          <ul className="mt-2 flex flex-col gap-1">
+                            {p.list.map((row) => (
+                              <li
+                                key={row.term}
+                                className="flex flex-wrap items-baseline gap-x-2 text-sm"
+                              >
+                                <span className="text-foreground">{row.term}</span>
+                                <span className={accentText}>({row.gloss})</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                         {p.detail && (
                           <p className="mt-1 text-sm leading-relaxed text-muted">{p.detail}</p>
                         )}
