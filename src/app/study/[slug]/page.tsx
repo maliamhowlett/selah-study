@@ -6,6 +6,8 @@ import { COURSE_STUDY, campusToday, campusWeekday, daysUntil } from "@/lib/study
 import { ACCT_MOCK_EXAM } from "@/lib/study/acct-exam";
 import DayPlan from "@/components/study/DayPlan";
 import DrillRunner from "@/components/study/DrillRunner";
+import GeneratedExam from "@/components/study/GeneratedExam";
+import LearnPanel from "@/components/study/LearnPanel";
 import MockExam from "@/components/study/MockExam";
 import PracticeProblems from "@/components/study/PracticeProblems";
 import StudyModes, { type StudyMode } from "@/components/study/StudyModes";
@@ -190,6 +192,19 @@ export default async function CourseStudyPage({
                     ),
                   },
                   hasDrills && {
+                    id: "learn",
+                    label: "Learn",
+                    blurb:
+                      "Ask anything, and the rules behind most of the marks in one place. Read here, then test yourself in Drill — reading alone feels like studying and mostly isn't.",
+                    content: (
+                      <LearnPanel
+                        accentText={course.text}
+                        accentBorder={course.border}
+                        accentTint={course.tint}
+                      />
+                    ),
+                  },
+                  hasDrills && {
                     id: "drill",
                     label: "Drill",
                     blurb:
@@ -209,6 +224,19 @@ export default async function CourseStudyPage({
                       "Longer, multi-step questions of the kind that carry the most marks. Work each on paper first.",
                     content: (
                       <PracticeProblems problems={plan.problems} accentText={course.text} />
+                    ),
+                  },
+                  hasDrills && {
+                    id: "generated",
+                    label: "New exam each time",
+                    blurb:
+                      "A fresh paper whenever you want one, with different numbers. Sit it, mark it, generate another — repeated testing beats repeated reading by a distance.",
+                    content: (
+                      <GeneratedExam
+                        accentText={course.text}
+                        accentBorder={course.border}
+                        accentTint={course.tint}
+                      />
                     ),
                   },
                   hasDrills && {
