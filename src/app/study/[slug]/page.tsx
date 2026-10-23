@@ -166,13 +166,52 @@ export default async function CourseStudyPage({
                           </article>
                         ))}
 
-                        <p className="max-w-2xl text-sm leading-relaxed text-muted">
-                          What is deliberately not on this list: the FIFO and LIFO
-                          computations, the allowance and aging calculations, the
-                          multi-step income statement, and recording purchases and sales.
-                          Those are the remaining 15 questions and they cost far more time
-                          each. Get to them only once the list above is solid.
-                        </p>
+                        {plan.deferred && (
+                          <div className="mt-8">
+                            <h3 className="text-2xl italic text-foreground">
+                              The other{" "}
+                              {plan.deferred.reduce((n, t) => n + t.questions, 0)}
+                            </h3>
+                            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                              Not padding — this is nearly 40% of the paper. It is left
+                              until second because every item needs either a journal entry
+                              or multi-step arithmetic, so each question costs several
+                              times the study time of the ones above. Together they take
+                              around{" "}
+                              {Math.round(
+                                plan.deferred.reduce((n, t) => n + t.minutes, 0) / 60,
+                              )}{" "}
+                              hours.
+                            </p>
+
+                            <div className="mt-4 flex flex-col gap-3">
+                              {plan.deferred.map((item) => (
+                                <article
+                                  key={item.what}
+                                  className="flex gap-4 rounded-2xl border border-border bg-surface p-4 opacity-90"
+                                >
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-foreground">{item.what}</p>
+                                    <p className="mt-1 text-sm leading-relaxed text-muted">
+                                      {item.why}
+                                    </p>
+                                  </div>
+                                  <div className="shrink-0 text-right">
+                                    <p className="text-lg tabular-nums text-muted">
+                                      {item.questions}
+                                    </p>
+                                    <p className="text-[10px] uppercase tracking-wider text-muted">
+                                      {item.questions === 1 ? "question" : "questions"}
+                                    </p>
+                                    <p className="mt-1 text-xs tabular-nums text-muted">
+                                      {item.minutes}m
+                                    </p>
+                                  </div>
+                                </article>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ),
                   },

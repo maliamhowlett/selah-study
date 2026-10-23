@@ -53,7 +53,7 @@ export const ACCT_MOCK_EXAM: MockExam = {
       choices: ["Monitoring.", "Information and communication.", "Risk assessment.", "Control activities."],
       correct: 3,
       answer:
-        "Control activities are the policies and procedures themselves — approvals, authorisations, separation of duties. Monitoring is checking the controls still work; risk assessment is deciding what to control in the first place.",
+        "Control activities are the policies and procedures themselves — approvals, authorizations, separation of duties. Monitoring is checking the controls still work; risk assessment is deciding what to control in the first place.",
     },
     {
       id: "q2",
@@ -252,7 +252,7 @@ export const ACCT_MOCK_EXAM: MockExam = {
       ],
       correct: 0,
       answer:
-        "Matching is the whole reason the allowance method exists: the cost of selling on credit is recognised in the period of the sale, not whenever the customer eventually defaults. (b) describes direct write-off.",
+        "Matching is the whole reason the allowance method exists: the cost of selling on credit is recognized in the period of the sale, not whenever the customer eventually defaults. (b) describes direct write-off.",
     },
     {
       id: "q15",
@@ -401,7 +401,7 @@ export const ACCT_MOCK_EXAM: MockExam = {
       ],
       correct: 1,
       answer:
-        "The loss is recognised as soon as value falls below cost, without waiting for a sale — conservatism. The rule only ever works downward: if NRV rises above cost you do nothing.",
+        "The loss is recognized as soon as value falls below cost, without waiting for a sale — conservatism. The rule only ever works downward: if NRV rises above cost you do nothing.",
     },
     {
       id: "q24",
@@ -537,8 +537,8 @@ export const ACCT_MOCK_EXAM: MockExam = {
         "  Commissions                6,000\n" +
         "  Back taxes owed by seller  6,000\n" +
         "  Title insurance            1,200\n" +
-        "  Capitalised cost         103,200\n\n" +
-        "The $1,500 of CURRENT-year taxes falling after the purchase date is an ordinary operating expense, not a cost of acquiring the land. Back taxes are capitalised because clearing the seller's debt was necessary to get title.",
+        "  Capitalized cost         103,200\n\n" +
+        "The $1,500 of CURRENT-year taxes falling after the purchase date is an ordinary operating expense, not a cost of acquiring the land. Back taxes are capitalized because clearing the seller's debt was necessary to get title.",
     },
     {
       id: "q32",
@@ -632,7 +632,7 @@ export const ACCT_MOCK_EXAM: MockExam = {
       choices: ["Franchise", "Patent", "Goodwill", "Copyright"],
       correct: 2,
       answer:
-        "Goodwill has an indefinite life, so it is never amortised — it is tested for impairment instead. Everything with a finite life gets amortised over it.",
+        "Goodwill has an indefinite life, so it is never amortized — it is tested for impairment instead. Everything with a finite life gets amortized over it.",
     },
     {
       id: "q39",
@@ -647,7 +647,7 @@ export const ACCT_MOCK_EXAM: MockExam = {
       ],
       correct: 1,
       answer:
-        "Materiality lets companies set a capitalisation threshold — a $40 stapler lasting ten years is expensed because nobody reading the statements would decide differently either way. Tracking it as an asset would cost more than it is worth.",
+        "Materiality lets companies set a capitalization threshold — a $40 stapler lasting ten years is expensed because nobody reading the statements would decide differently either way. Tracking it as an asset would cost more than it is worth.",
     },
     {
       id: "q40",

@@ -241,7 +241,7 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
       { account: "Inventory", debit: 400 },
       { account: "Cash", credit: 400 },
     ],
-    note: "Freight-IN is a cost of getting the goods ready to sell, so it is capitalised into inventory.",
+    note: "Freight-IN is a cost of getting the goods ready to sell, so it is capitalized into inventory.",
   },
   {
     id: "d-fifo-lifo-adjust",
@@ -264,7 +264,7 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
       { account: "Cash", credit: 500 },
     ],
     note:
-      "Freight-OUT is an expense — either selling expense or COGS — and never touches Inventory. Freight-IN is capitalised into Inventory. Your packet puts these side by side for a reason.",
+      "Freight-OUT is an expense — either selling expense or COGS — and never touches Inventory. Freight-IN is capitalized into Inventory. Your packet puts these side by side for a reason.",
   },
   {
     id: "d-purchase-return",
@@ -298,7 +298,7 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
       { account: "Cash", credit: 65000 },
     ],
     note:
-      "Everything needed to get the asset ready for its intended use is capitalised into one figure.",
+      "Everything needed to get the asset ready for its intended use is capitalized into one figure.",
   },
   {
     id: "d-straight-line",
@@ -334,7 +334,7 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
       { account: "Cash", credit: 18000 },
     ],
     note:
-      "Extends useful life, so it is capitalised into the asset — not Repairs and Maintenance Expense. Two questions on the blueprint ride on this distinction.",
+      "Extends useful life, so it is capitalized into the asset — not Repairs and Maintenance Expense. Two questions on the blueprint ride on this distinction.",
   },
   {
     id: "d-lump-sum",
@@ -369,7 +369,7 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
       { account: "Repairs and Maintenance Expense", debit: 1200 },
       { account: "Cash", credit: 1200 },
     ],
-    note: "Routine upkeep is expensed however large the bill. Only improvements get capitalised.",
+    note: "Routine upkeep is expensed however large the bill. Only improvements get capitalized.",
   },
   {
     id: "d-patent-rd",
@@ -381,7 +381,7 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
       { account: "Cash", credit: 7200 },
     ],
     note:
-      "Only the $7,200 is capitalised. The $200,000 of R&D was expensed as incurred — it never becomes part of the patent. This is Example 3 from your Ch. 7 packet.",
+      "Only the $7,200 is capitalized. The $200,000 of R&D was expensed as incurred — it never becomes part of the patent. This is Example 3 from your Ch. 7 packet.",
   },
   {
     id: "d-patent-amortize",
@@ -393,7 +393,7 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
       { account: "Patent", credit: 450 },
     ],
     note:
-      "Amortise over the SHORTER of legal life and service life — 8 years, not 20. $7,200 ÷ 8 = $900 a year, and only six months have run: $900 × 6/12 = $450.",
+      "Amortize over the SHORTER of legal life and service life — 8 years, not 20. $7,200 ÷ 8 = $900 a year, and only six months have run: $900 × 6/12 = $450.",
   },
   {
     id: "d-disposal-partial-year",
@@ -583,7 +583,7 @@ export const CLASSIFICATION_DRILLS: ClassificationDrill[] = [
     statement: "Income statement",
     section: "Other revenue, below operating income",
     normalBalance: "Credit",
-    note: "Below operating income, so it does not change operating income — a favourite trap on multi-step income statement questions.",
+    note: "Below operating income, so it does not change operating income — a favorite trap on multi-step income statement questions.",
   },
   {
     id: "c-loss-sale",

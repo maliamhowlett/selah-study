@@ -5,7 +5,7 @@ import type { PracticeProblem } from "@/lib/study/plans";
 
 interface Props {
   problems: PracticeProblem[];
-  /** Tailwind text colour for the course, so these match the rest of the page. */
+  /** Tailwind text color for the course, so these match the rest of the page. */
   accentText: string;
 }
 

@@ -80,6 +80,8 @@ export interface ExamPlan {
   blueprint?: BlueprintChapter[];
   /** Highest-return work first, for when time is short. */
   triage?: TriageItem[];
+  /** What the triage leaves out, named rather than implied. */
+  deferred?: TriageItem[];
   topics: StudyTopic[];
   days: StudyDay[];
   problems: PracticeProblem[];
@@ -176,14 +178,14 @@ const ACCT_BLUEPRINT: BlueprintChapter[] = [
         lo: "3",
         topic: "Accounting treatment of subsequent expenditures",
         questions: 2,
-        gap: "Two questions on capitalise-versus-expense, and the practice paper barely touches it.",
+        gap: "Two questions on capitalize-versus-expense, and the practice paper barely touches it.",
       },
       { lo: "4", topic: "Calculate depreciation or accumulated depreciation, straight-line or DDB", questions: 2 },
       {
         lo: "5",
         topic: "Calculate amortization expense and the carrying value of an intangible",
         questions: 1,
-        gap: "The practice paper only asks which intangible does not amortise — never asks you to compute one.",
+        gap: "The practice paper only asks which intangible does not amortize — never asks you to compute one.",
       },
       { lo: "6", topic: "Determine gain or loss on sale of an asset", questions: 1 },
     ],
@@ -204,16 +206,16 @@ const ACCT_TRIAGE: TriageItem[] = [
     why: "One rule covers both questions: FIFO gives higher ending inventory and higher net income, LIFO gives higher COGS and lower tax.",
   },
   {
-    what: "Which intangible is which, and which one never amortises",
+    what: "Which intangible is which, and which one never amortizes",
     questions: 2,
     minutes: 15,
-    why: "Patent, copyright, trademark, franchise, goodwill. Flashcard material — goodwill is the one that doesn't amortise.",
+    why: "Patent, copyright, trademark, franchise, goodwill. Flashcard material — goodwill is the one that doesn't amortize.",
   },
   {
-    what: "Capitalise or expense a subsequent expenditure",
+    what: "Capitalize or expense a subsequent expenditure",
     questions: 2,
     minutes: 15,
-    why: "One rule: extends life, adds capacity, or gets it ready to use → capitalise. Routine upkeep → expense.",
+    why: "One rule: extends life, adds capacity, or gets it ready to use → capitalize. Routine upkeep → expense.",
   },
   {
     what: "Depreciation: straight-line and double-declining balance",
@@ -271,6 +273,78 @@ const ACCT_TRIAGE: TriageItem[] = [
   },
 ];
 
+// The other fifteen. Named explicitly, because "the rest" invites the
+// assumption that it is small — it is nearly 40% of the paper, and it is the
+// part that needs journal entries and multi-step arithmetic.
+const ACCT_DEFERRED: TriageItem[] = [
+  {
+    what: "Compute COGS or ending inventory under FIFO or LIFO",
+    questions: 2,
+    minutes: 45,
+    why: "Layer-by-layer arithmetic under time pressure. Worth doing once the list above is solid — Drill → New exam each time generates these endlessly.",
+  },
+  {
+    what: "Multi-step income statement subtotals",
+    questions: 2,
+    minutes: 30,
+    why: "Net sales → gross profit → operating income → net income, in order. Drill → Statement figures.",
+  },
+  {
+    what: "Record the purchase and sale of inventory",
+    questions: 2,
+    minutes: 30,
+    why: "Perpetual sales are two entries, and forgetting the second is the usual slip.",
+  },
+  {
+    what: "Record credit sales, with and without discounts",
+    questions: 2,
+    minutes: 30,
+    why: "Needs the entry, and needs you to count the days to see whether the discount applies.",
+  },
+  {
+    what: "Calculate bad debt expense from the allowance balance",
+    questions: 1,
+    minutes: 20,
+    why: "Adjust TO the target, not BY it, and watch whether the opening balance is a debit.",
+  },
+  {
+    what: "Calculate bad debt expense using the aging method",
+    questions: 1,
+    minutes: 25,
+    why: "The hardest single thing in Ch. 5, and your practice exam never asks it. Problems tab has a full worked one.",
+  },
+  {
+    what: "Record customer returns",
+    questions: 1,
+    minutes: 15,
+    why: "Sales Returns and Allowances is contra-revenue, so it takes a debit.",
+  },
+  {
+    what: "Lower of cost and net realizable value",
+    questions: 1,
+    minutes: 15,
+    why: "Only ever writes inventory down, and the write-down goes to COGS.",
+  },
+  {
+    what: "Record petty cash expenditures",
+    questions: 1,
+    minutes: 15,
+    why: "The Petty Cash account itself doesn't move when you replenish.",
+  },
+  {
+    what: "Accounting for different forms of customer payment",
+    questions: 1,
+    minutes: 15,
+    why: "Credit card fees are an expense; revenue is still recorded at the full amount.",
+  },
+  {
+    what: "Calculate amortization and the carrying value of an intangible",
+    questions: 1,
+    minutes: 20,
+    why: "Shorter of legal and service life, and usually a part-year. Problems tab has Dr. Bokrand's own example.",
+  },
+];
+
 const ACCT_EXAM_2: ExamPlan = {
   label: "Exam 2",
   date: "2026-10-27",
@@ -280,6 +354,7 @@ const ACCT_EXAM_2: ExamPlan = {
   weight: "20% of your grade",
   blueprint: ACCT_BLUEPRINT,
   triage: ACCT_TRIAGE,
+  deferred: ACCT_DEFERRED,
   situation: [
     "Exam 2 is worth 20%, more than Exam 1's 15% — and Exam 3 is another 25%. " +
       "Most of the exam weight in this course is still ahead of you.",
@@ -419,8 +494,8 @@ const ACCT_EXAM_2: ExamPlan = {
       tasks: [
         "30 min — Example 1 and Activity 1: tangible asset cost, and the lump-sum purchase split by relative fair value.",
         "35 min — Example 2 and Activity 2: straight-line and double-declining balance. Skip Activity 3 — units-of-production is not on the blueprint.",
-        "30 min — Subsequent expenditures, capitalise versus expense. Two questions, and the practice exam barely covers it.",
-        "30 min — Example 3, the patent: R&D expensed, legal fees capitalised, shorter of legal and service life, part-year charge.",
+        "30 min — Subsequent expenditures, capitalize versus expense. Two questions, and the practice exam barely covers it.",
+        "30 min — Example 3, the patent: R&D expensed, legal fees capitalized, shorter of legal and service life, part-year charge.",
         "30 min — Activity 4, a part-year disposal. Depreciate up to the sale date before computing the gain.",
         "20 min — Characteristics of the different intangibles. Two questions, straight memorisation.",
       ],
@@ -515,7 +590,7 @@ const ACCT_EXAM_2: ExamPlan = {
         "   Cr Accounts Receivable                    900\n\n" +
         "Total assets: NO CHANGE. Accounts Receivable falls $900 and the contra " +
         "account falls $900, so net realizable value is unchanged.\n" +
-        "Net income: NO CHANGE. The expense was recognised when the allowance " +
+        "Net income: NO CHANGE. The expense was recognized when the allowance " +
         "was estimated, not now.",
       trap:
         "A write-off never touches Bad Debt Expense. If your entry has an expense " +
@@ -622,7 +697,7 @@ const ACCT_EXAM_2: ExamPlan = {
         "Carrying value at 31 December = $7,200 − $450 = $6,750",
       trap:
         "Three separate traps in one question, which is why it is Example 3 in " +
-        "your packet: R&D is expensed and never capitalised; you amortise over " +
+        "your packet: R&D is expensed and never capitalized; you amortize over " +
         "the shorter life, so 8 years and not 20; and a mid-year registration " +
         "means a part-year charge. Your blueprint asks for this calculation and " +
         "the practice exam never does.",

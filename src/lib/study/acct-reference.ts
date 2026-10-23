@@ -35,15 +35,15 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
         point:
           "Five components: control environment, risk assessment, control activities, information and communication, monitoring.",
         detail:
-          "Control ACTIVITIES are the policies and procedures themselves — approvals, authorisations, separation of duties. Risk assessment decides what needs controlling; monitoring checks the controls still work.",
+          "Control ACTIVITIES are the policies and procedures themselves — approvals, authorizations, separation of duties. Risk assessment decides what needs controlling; monitoring checks the controls still work.",
       },
       {
         point: "Preventive controls stop problems. Detective controls find them afterwards.",
         detail:
-          "Preventive: separation of duties, physical controls, proper authorisation. Detective: reconciliations, performance reviews, audits. Exam questions usually ask which one a reconciliation is — it is detective.",
+          "Preventive: separation of duties, physical controls, proper authorization. Detective: reconciliations, performance reviews, audits. Exam questions usually ask which one a reconciliation is — it is detective.",
       },
       {
-        point: "Separation of duties means nobody both authorises and records the same transaction.",
+        point: "Separation of duties means nobody both authorizes and records the same transaction.",
         detail:
           "One person handling cash and also making the deposit is the classic weakness. So is one employee who both approves and signs checks.",
       },
@@ -172,7 +172,7 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
         detail: "If NRV is above cost you do nothing.",
       },
       {
-        point: "Freight-IN is capitalised into Inventory. Freight-OUT is an expense.",
+        point: "Freight-IN is capitalized into Inventory. Freight-OUT is an expense.",
         detail: "Freight-out never touches inventory — it goes to selling expense or COGS.",
       },
       {
@@ -195,7 +195,7 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
     points: [
       {
         point:
-          "Capitalise anything that extends useful life, adds capacity, or was needed to get the asset ready for use.",
+          "Capitalize anything that extends useful life, adds capacity, or was needed to get the asset ready for use.",
         detail:
           "Freight-in, installation, testing, back taxes owed by the seller, a new engine. Routine repairs and repainting are expensed however large.",
       },
@@ -217,14 +217,14 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
         detail: "And depreciate up to the sale date first — a part-year disposal is where this goes wrong.",
       },
       {
-        point: "Amortise an intangible over the SHORTER of its legal life and its service life.",
-        detail: "A 20-year patent with an 8-year service life amortises over 8.",
+        point: "Amortize an intangible over the SHORTER of its legal life and its service life.",
+        detail: "A 20-year patent with an 8-year service life amortizes over 8.",
       },
       {
-        point: "Goodwill has an indefinite life and is never amortised — it is tested for impairment.",
+        point: "Goodwill has an indefinite life and is never amortized — it is tested for impairment.",
       },
       {
-        point: "R&D is expensed as incurred. Only the legal and registration fees of a patent are capitalised.",
+        point: "R&D is expensed as incurred. Only the legal and registration fees of a patent are capitalized.",
         detail: "Management's confidence about future benefit changes nothing.",
       },
       {

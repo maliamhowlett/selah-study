@@ -1,6 +1,6 @@
 // Marks a typed journal entry against the expected one.
 //
-// The point of typing rather than revealing is that recognising an answer and
+// The point of typing rather than revealing is that recognizing an answer and
 // producing one are different skills, and only the second is what the exam
 // asks for. Revealing first makes almost everything feel familiar.
 //
@@ -52,7 +52,7 @@ const ALIASES: Record<string, string> = {
   "dep expense": "depreciation expense",
   "depr expense": "depreciation expense",
   "amort expense": "amortization expense",
-  "amortisation expense": "amortization expense",
+  "amortisation expense": "amortization expense", // accept the British spelling
   "deferred rev": "deferred revenue",
   "unearned revenue": "deferred revenue",
   "service rev": "service revenue",
@@ -109,7 +109,7 @@ type Side = "debit" | "credit";
 
 interface Posting {
   account: string;
-  /** As written, for feedback — the normalised form is for matching only. */
+  /** As written, for feedback — the normalized form is for matching only. */
   label: string;
   side: Side;
   amount: number;

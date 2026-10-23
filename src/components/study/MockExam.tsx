@@ -89,7 +89,7 @@ export default function MockExam({
           {exam.questions.length} questions, {exam.minutes} minutes. Paper and a
           calculator, nothing else. The clock is the point — knowing the material
           and finishing in time are two different skills, and only one of them
-          gets practised by reading.
+          gets practiced by reading.
         </p>
         <button
           type="button"
