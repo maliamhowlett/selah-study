@@ -596,3 +596,135 @@ export const CLASSIFICATION_DRILLS: ClassificationDrill[] = [
 
 /** Every chapter present in the drills, in the order they are taught. */
 export const DRILL_CHAPTERS = [...new Set(JOURNAL_DRILLS.map((d) => d.chapter))];
+
+// ---------------------------------------------------------------------------
+// Statement subtotals.
+//
+// The Connect homework asks for whole statements; the exam is forty multiple
+// choice, so it asks for one number out of a statement — net sales, gross
+// profit, operating income, net receivables, cash and cash equivalents. That
+// is five marks on the blueprint, it is pure arithmetic, and none of it needs
+// a journal entry.
+// ---------------------------------------------------------------------------
+
+export interface StatementDrill {
+  id: string;
+  chapter: string;
+  /** The data, shown as a block above the question. */
+  scenario: string;
+  question: string;
+  answer: number;
+  working: string;
+  trap?: string;
+}
+
+const MULTI_STEP = `  Sales revenue                   $520,000
+  Sales returns and allowances      15,000
+  Sales discounts                    5,000
+  Cost of goods sold               300,000
+  Salaries expense                  70,000
+  Rent expense                      36,000
+  Depreciation expense              14,000
+  Interest expense                   8,000
+  Income tax expense                20,000`;
+
+export const STATEMENT_DRILLS: StatementDrill[] = [
+  {
+    id: "s-net-sales",
+    chapter: "Ch. 6",
+    scenario: MULTI_STEP,
+    question: "What is net sales?",
+    answer: 500000,
+    working:
+      "  Sales revenue              520,000\n" +
+      "  Less returns & allowances  (15,000)\n" +
+      "  Less sales discounts        (5,000)\n" +
+      "  Net sales                  500,000",
+    trap:
+      "Returns and discounts are contra-revenue — they come off the top before anything else happens.",
+  },
+  {
+    id: "s-gross-profit",
+    chapter: "Ch. 6",
+    scenario: MULTI_STEP,
+    question: "What is gross profit?",
+    answer: 200000,
+    working:
+      "  Net sales      500,000\n" +
+      "  Less COGS     (300,000)\n" +
+      "  Gross profit   200,000",
+    trap:
+      "Gross profit uses NET sales, not the $520,000 headline. Only cost of goods sold comes off here — no operating expenses yet.",
+  },
+  {
+    id: "s-operating-income",
+    chapter: "Ch. 6",
+    scenario: MULTI_STEP,
+    question: "What is operating income?",
+    answer: 80000,
+    working:
+      "  Gross profit            200,000\n" +
+      "  Less salaries            (70,000)\n" +
+      "  Less rent                (36,000)\n" +
+      "  Less depreciation        (14,000)\n" +
+      "  Operating income         80,000",
+    trap:
+      "Interest expense and income tax are NOT operating expenses — they sit below this line. Subtracting them here is the single most common mistake on this question.",
+  },
+  {
+    id: "s-net-income",
+    chapter: "Ch. 6",
+    scenario: MULTI_STEP,
+    question: "What is net income?",
+    answer: 52000,
+    working:
+      "  Operating income      80,000\n" +
+      "  Less interest expense (8,000)\n" +
+      "  Income before tax     72,000\n" +
+      "  Less income tax      (20,000)\n" +
+      "  Net income            52,000",
+    trap: "Interest first, then tax. Income before tax is a subtotal they can ask for on its own.",
+  },
+  {
+    id: "s-net-revenues",
+    chapter: "Ch. 5",
+    scenario: `  Sales revenue                   $250,000
+  Sales returns and allowances      12,000
+  Sales discounts                    5,000`,
+    question: "What are net revenues?",
+    answer: 233000,
+    working: "  250,000 − 12,000 − 5,000 = 233,000",
+    trap:
+      "Both contra-revenue accounts come off. Your blueprint has this as its own question in Ch. 5.",
+  },
+  {
+    id: "s-net-ar",
+    chapter: "Ch. 5",
+    scenario: `  Accounts receivable                        $90,000
+  Allowance for uncollectible accounts         6,500 Cr.`,
+    question: "What is net accounts receivable?",
+    answer: 83500,
+    working: "  90,000 − 6,500 = 83,500",
+    trap:
+      "Net realizable value — what you actually expect to collect. This is the figure that appears on the balance sheet, not the gross $90,000.",
+  },
+  {
+    id: "s-cash-equivalents",
+    chapter: "Ch. 4",
+    scenario: `  Checking account                     $12,400
+  Petty cash                               300
+  Treasury bill, matures in 60 days      5,000
+  Certificate of deposit, 6-month       10,000
+  Accounts receivable                    8,000
+  Postage stamps on hand                    75`,
+    question: "What is reported as cash and cash equivalents?",
+    answer: 17700,
+    working:
+      "  Checking account        12,400\n" +
+      "  Petty cash                 300\n" +
+      "  60-day Treasury bill     5,000\n" +
+      "  Cash & equivalents      17,700",
+    trap:
+      "A cash equivalent matures in THREE MONTHS OR LESS, so the 6-month CD is a short-term investment instead. Receivables are not cash, and stamps are supplies.",
+  },
+];

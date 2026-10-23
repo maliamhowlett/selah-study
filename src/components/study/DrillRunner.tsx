@@ -5,15 +5,17 @@ import {
   CLASSIFICATION_DRILLS,
   DRILL_CHAPTERS,
   JOURNAL_DRILLS,
+  STATEMENT_DRILLS,
   type ClassificationDrill,
   type EntryLine,
   type JournalDrill,
+  type StatementDrill,
 } from "@/lib/study/acct-drills";
 import { gradeEntry, type GradeResult, type SubmittedLine } from "@/lib/study/grade-entry";
 import { useStoredValue, writeStoredValue } from "@/lib/study/local-store";
 
 type Result = "got" | "missed";
-type Kind = "journal" | "classification";
+type Kind = "journal" | "classification" | "statement";
 
 /** What was stored per drill. The verdict matters as much as the result:
  * "close" means the accounts were right and the posting wasn't, which is a
@@ -107,12 +109,18 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
   const [pickBalance, setPickBalance] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
 
+  // Statement attempt state — a single typed number.
+  const [figure, setFigure] = useState("");
+
   const [copied, setCopied] = useState(false);
 
   const raw = useStoredValue(STORE_KEY);
   const results = useMemo(() => parseResults(raw), [raw]);
 
   const deck = useMemo(() => {
+    if (kind === "statement") {
+      return STATEMENT_DRILLS.filter((d) => !missedOnly || results[d.id]?.result === "missed");
+    }
     if (kind === "classification") {
       return CLASSIFICATION_DRILLS.filter((d) => !missedOnly || results[d.id]?.result === "missed");
     }
@@ -156,6 +164,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     setGrade(null);
     setPickStatement(null);
     setPickBalance(null);
+    setFigure("");
     setChecked(false);
   };
 
@@ -189,11 +198,26 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     record(drill.id, right ? "got" : "missed", right ? "correct" : "wrong");
   };
 
+  const checkStatement = () => {
+    const drill = current as StatementDrill;
+    setChecked(true);
+    const typed = Number(figure.replace(/[$,\s]/g, ""));
+    const right = Number.isFinite(typed) && Math.abs(typed - drill.answer) < 0.005;
+    record(drill.id, right ? "got" : "missed", right ? "correct" : "wrong");
+  };
+
+  const statementRight = () => {
+    const drill = current as StatementDrill;
+    const typed = Number(figure.replace(/[$,\s]/g, ""));
+    return Number.isFinite(typed) && Math.abs(typed - drill.answer) < 0.005;
+  };
+
   const copyResults = async () => {
     const lines = ["ACCT 20000 drill results", ""];
     for (const [label, list] of [
       ["Journal entries", JOURNAL_DRILLS as { id: string; chapter?: string; prompt?: string; account?: string }[]],
       ["Account classification", CLASSIFICATION_DRILLS as { id: string; chapter?: string; prompt?: string; account?: string }[]],
+      ["Statement subtotals", STATEMENT_DRILLS.map((d) => ({ id: d.id, chapter: d.chapter, prompt: d.question })) as { id: string; chapter?: string; prompt?: string; account?: string }[]],
     ] as const) {
       const done = list.filter((d) => results[d.id]);
       if (done.length === 0) continue;
@@ -238,6 +262,13 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
           className={kind === "classification" ? chipOn : chipOff}
         >
           Where does it go
+        </button>
+        <button
+          type="button"
+          onClick={() => reset({ kind: "statement" })}
+          className={kind === "statement" ? chipOn : chipOff}
+        >
+          Statement figures
         </button>
         {missedCount > 0 && (
           <button
@@ -284,14 +315,49 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
         <article className="rounded-2xl border border-border bg-surface p-6">
           <div className="mb-4 flex items-baseline justify-between gap-3">
             <span className={`text-xs uppercase tracking-[0.15em] ${accentText}`}>
-              {kind === "journal" ? (current as JournalDrill).chapter : "Account classification"}
+              {kind === "journal"
+                ? (current as JournalDrill).chapter
+                : kind === "statement"
+                  ? `${(current as StatementDrill).chapter} · statement figure`
+                  : "Account classification"}
             </span>
             <span className="text-xs tabular-nums text-muted">
               {safeIndex + 1} of {deck.length}
             </span>
           </div>
 
-          {kind === "journal" ? (
+          {kind === "statement" ? (
+            <>
+              <pre className="overflow-x-auto whitespace-pre rounded-xl bg-background p-4 font-mono text-[13px] leading-relaxed text-foreground">
+                {(current as StatementDrill).scenario}
+              </pre>
+              <p className="mt-4 text-lg text-foreground">
+                {(current as StatementDrill).question}
+              </p>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <span className="text-muted">$</span>
+                <input
+                  value={figure}
+                  inputMode="decimal"
+                  disabled={checked}
+                  onChange={(e) => setFigure(e.target.value)}
+                  placeholder="0"
+                  aria-label="Your answer"
+                  className={`${inputClass} max-w-[12rem] text-right tabular-nums`}
+                />
+                {!checked && (
+                  <button
+                    type="button"
+                    disabled={!figure.trim()}
+                    onClick={checkStatement}
+                    className="rounded-full gradient-primary px-6 py-2 text-sm text-white shadow-md hover:scale-[1.02] disabled:opacity-50"
+                  >
+                    Check it
+                  </button>
+                )}
+              </div>
+            </>
+          ) : kind === "journal" ? (
             <>
               <p className="leading-relaxed text-foreground">{(current as JournalDrill).prompt}</p>
               {splitEntries((current as JournalDrill).entry).length > 1 && (
@@ -430,7 +496,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
 
           {/* --- marked --- */}
           {((kind === "journal" && grade && grade.verdict !== "empty") ||
-            (kind === "classification" && checked)) && (
+            ((kind === "classification" || kind === "statement") && checked)) && (
             <div className="mt-5 flex flex-col gap-4">
               {kind === "journal" && grade && (
                 <>
@@ -457,6 +523,14 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                 </>
               )}
 
+              {kind === "statement" && (
+                <p className={`text-lg ${statementRight() ? "text-success" : "text-exam"}`}>
+                  {statementRight()
+                    ? "Correct."
+                    : `Not right — the answer is $${(current as StatementDrill).answer.toLocaleString("en-US")}.`}
+                </p>
+              )}
+
               {kind === "classification" && (
                 <p
                   className={`text-lg ${
@@ -474,7 +548,11 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
               )}
 
               <div className="rounded-xl bg-background p-4">
-                {kind === "journal" ? (
+                {kind === "statement" ? (
+                  <pre className="overflow-x-auto whitespace-pre font-mono text-[13px] leading-relaxed text-foreground">
+                    {(current as StatementDrill).working}
+                  </pre>
+                ) : kind === "journal" ? (
                   <div className="flex flex-col gap-4">
                     {splitEntries((current as JournalDrill).entry).map((lines, i, all) => (
                       <div key={i}>
@@ -505,8 +583,14 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                 )}
               </div>
 
-              {current.note && (
-                <p className="text-sm leading-relaxed text-muted">{current.note}</p>
+              {(kind === "statement"
+                ? (current as StatementDrill).trap
+                : (current as JournalDrill | ClassificationDrill).note) && (
+                <p className="text-sm leading-relaxed text-muted">
+                  {kind === "statement"
+                    ? (current as StatementDrill).trap
+                    : (current as JournalDrill | ClassificationDrill).note}
+                </p>
               )}
 
               <button
