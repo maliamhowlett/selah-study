@@ -122,13 +122,13 @@ export default async function CourseStudyPage({
                     id: "triage",
                     label: "Short on time",
                     blurb:
-                      "Ranked by marks per minute, highest first. Work down the list and stop when you run out of time — whatever you reach will be the most valuable thing left.",
+                      "Ranked by questions per minute, highest first. Work down the list and stop when you run out of time — whatever you reach will be the most valuable thing left.",
                     content: (
                       <div className="flex flex-col gap-3">
                         <p className="max-w-2xl rounded-2xl border border-border bg-surface p-4 text-sm leading-relaxed text-foreground">
                           Everything here together is{" "}
                           <span className={`font-semibold ${course.text}`}>
-                            {plan.triage.reduce((n, t) => n + t.marks, 0)} of the 40 marks
+                            {plan.triage.reduce((n, t) => n + t.questions, 0)} of the 40 questions
                           </span>{" "}
                           in about{" "}
                           {Math.round(
@@ -154,10 +154,10 @@ export default async function CourseStudyPage({
                             </div>
                             <div className="shrink-0 text-right">
                               <p className={`text-lg tabular-nums ${course.text}`}>
-                                {item.marks}
+                                {item.questions}
                               </p>
                               <p className="text-[10px] uppercase tracking-wider text-muted">
-                                {item.marks === 1 ? "mark" : "marks"}
+                                {item.questions === 1 ? "question" : "questions"}
                               </p>
                               <p className="mt-1 text-xs tabular-nums text-muted">
                                 {item.minutes}m
@@ -170,7 +170,7 @@ export default async function CourseStudyPage({
                           What is deliberately not on this list: the FIFO and LIFO
                           computations, the allowance and aging calculations, the
                           multi-step income statement, and recording purchases and sales.
-                          Those are the remaining 15 marks and they cost far more time
+                          Those are the remaining 15 questions and they cost far more time
                           each. Get to them only once the list above is solid.
                         </p>
                       </div>
@@ -195,7 +195,7 @@ export default async function CourseStudyPage({
                     id: "learn",
                     label: "Learn",
                     blurb:
-                      "Ask anything, and the rules behind most of the marks in one place. Read here, then test yourself in Drill — reading alone feels like studying and mostly isn't.",
+                      "Ask anything, and the rules behind most of the questions in one place. Read here, then test yourself in Drill — reading alone feels like studying and mostly isn't.",
                     content: (
                       <LearnPanel
                         accentText={course.text}
@@ -221,7 +221,7 @@ export default async function CourseStudyPage({
                     id: "problems",
                     label: "Problems",
                     blurb:
-                      "Longer, multi-step questions of the kind that carry the most marks. Work each on paper first.",
+                      "Longer, multi-step questions of the kind that carry the most questions. Work each on paper first.",
                     content: (
                       <PracticeProblems problems={plan.problems} accentText={course.text} />
                     ),

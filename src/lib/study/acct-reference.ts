@@ -1,7 +1,7 @@
 // A revision reference for ACCT 20000 Exam 2.
 //
 // Written against Dr. Bokrand's blueprint rather than extracted from the notes
-// packets — several of the things worth the most marks (the internal control
+// packets — several of the highest-value topics (the internal control
 // components especially) are illustrations in the PDF, so there is no text to
 // pull. Where the packets did state something exactly, that wording is used:
 // the three-month cash equivalent test, AUA and BDE, the POR method.
@@ -19,8 +19,8 @@ export interface ReferenceSection {
   id: string;
   chapter: string;
   title: string;
-  /** Marks this section is worth on the blueprint. */
-  marks: number;
+  /** Questions this section is worth on the blueprint. */
+  questions: number;
   points: ReferencePoint[];
 }
 
@@ -29,7 +29,7 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
     id: "r-internal-control",
     chapter: "Ch. 4",
     title: "Internal control",
-    marks: 3,
+    questions: 3,
     points: [
       {
         point:
@@ -49,7 +49,7 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
       },
       {
         point: "Executives must certify the financial statements.",
-        detail: "Sarbanes-Oxley. One mark, one fact.",
+        detail: "Sarbanes-Oxley. One question, one fact.",
       },
       {
         point: "Internal control cannot eliminate fraud — only reduce it.",
@@ -61,7 +61,7 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
     id: "r-cash",
     chapter: "Ch. 4",
     title: "Cash, bank reconciliation, petty cash",
-    marks: 4,
+    questions: 4,
     points: [
       {
         point:
@@ -105,7 +105,7 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
     id: "r-receivables",
     chapter: "Ch. 5",
     title: "Receivables and the allowance",
-    marks: 6,
+    questions: 6,
     points: [
       {
         point:
@@ -115,7 +115,7 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
         point:
           "POR and aging both adjust the allowance TO a target balance. Percentage-of-sales adjusts BY an amount.",
         detail:
-          "This is the most commonly lost mark in the chapter. Target minus what's already there — and if the existing balance is a DEBIT you add it instead of subtracting.",
+          "This is the most commonly lost question in the chapter. Target minus what's already there — and if the existing balance is a DEBIT you add it instead of subtracting.",
       },
       {
         point:
@@ -148,12 +148,12 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
     id: "r-inventory",
     chapter: "Ch. 6",
     title: "Inventory and cost of goods sold",
-    marks: 6,
+    questions: 6,
     points: [
       {
         point:
           "In rising prices: FIFO gives higher ending inventory and higher net income. LIFO gives higher COGS, lower income, lower tax.",
-        detail: "One rule, two marks. If prices are falling, everything flips.",
+        detail: "One rule, two questions. If prices are falling, everything flips.",
       },
       {
         point: "Goods available for sale = beginning inventory + purchases. It is the control total.",
@@ -191,7 +191,7 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
     id: "r-longterm",
     chapter: "Ch. 7",
     title: "Long-term assets",
-    marks: 6,
+    questions: 6,
     points: [
       {
         point:

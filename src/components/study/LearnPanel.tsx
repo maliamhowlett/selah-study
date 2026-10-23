@@ -23,7 +23,7 @@ export default function LearnPanel({ accentText, accentBorder, accentTint }: Pro
       return next;
     });
 
-  const totalMarks = ACCT_REFERENCE.reduce((n, s) => n + s.marks, 0);
+  const totalMarks = ACCT_REFERENCE.reduce((n, s) => n + s.questions, 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -36,7 +36,7 @@ export default function LearnPanel({ accentText, accentBorder, accentTint }: Pro
       <div>
         <h3 className="text-2xl italic text-foreground">What to know</h3>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          The rules behind roughly {totalMarks} of the 40 marks, ordered by what
+          The rules behind roughly {totalMarks} of the 40 questions, ordered by what
           Dr. Bokrand&apos;s blueprint pays for. Written against that blueprint
           rather than copied out of the packets — several of the highest-value
           topics are illustrations in the PDF with no text to pull. Where a
@@ -62,7 +62,7 @@ export default function LearnPanel({ accentText, accentBorder, accentTint }: Pro
                 <span
                   className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] uppercase tracking-wider ${accentBorder} ${accentText}`}
                 >
-                  {section.marks} marks
+                  {section.questions} questions
                 </span>
                 <span aria-hidden="true" className="shrink-0 text-muted">
                   {open ? "−" : "+"}

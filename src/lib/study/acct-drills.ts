@@ -334,7 +334,7 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
       { account: "Cash", credit: 18000 },
     ],
     note:
-      "Extends useful life, so it is capitalised into the asset — not Repairs and Maintenance Expense. Two marks on the blueprint ride on this distinction.",
+      "Extends useful life, so it is capitalised into the asset — not Repairs and Maintenance Expense. Two questions on the blueprint ride on this distinction.",
   },
   {
     id: "d-lump-sum",
@@ -603,7 +603,7 @@ export const DRILL_CHAPTERS = [...new Set(JOURNAL_DRILLS.map((d) => d.chapter))]
 // The Connect homework asks for whole statements; the exam is forty multiple
 // choice, so it asks for one number out of a statement — net sales, gross
 // profit, operating income, net receivables, cash and cash equivalents. That
-// is five marks on the blueprint, it is pure arithmetic, and none of it needs
+// is five questions on the blueprint, it is pure arithmetic, and none of it needs
 // a journal entry.
 // ---------------------------------------------------------------------------
 

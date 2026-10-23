@@ -28,13 +28,13 @@ export interface StudyTopic {
 }
 
 /**
- * One item in the time-poor ordering. Ranked by marks per minute, because
+ * One item in the time-poor ordering. Ranked by questions per minute, because
  * when there isn't time for everything the question stops being "what should
  * I learn" and becomes "what do I learn first".
  */
 export interface TriageItem {
   what: string;
-  marks: number;
+  questions: number;
   minutes: number;
   /** Why it is this cheap — usually "one rule" or "no calculation". */
   why: string;
@@ -176,7 +176,7 @@ const ACCT_BLUEPRINT: BlueprintChapter[] = [
         lo: "3",
         topic: "Accounting treatment of subsequent expenditures",
         questions: 2,
-        gap: "Two marks on capitalise-versus-expense, and the practice paper barely touches it.",
+        gap: "Two questions on capitalise-versus-expense, and the practice paper barely touches it.",
       },
       { lo: "4", topic: "Calculate depreciation or accumulated depreciation, straight-line or DDB", questions: 2 },
       {
@@ -193,81 +193,81 @@ const ACCT_BLUEPRINT: BlueprintChapter[] = [
 const ACCT_TRIAGE: TriageItem[] = [
   {
     what: "Internal control: the definitions and the components",
-    marks: 3,
+    questions: 3,
     minutes: 20,
     why: "The biggest single topic on the paper and pure memorisation — no calculation, no entries. Ch. 4 packet.",
   },
   {
     what: "Inventory method effects in rising prices",
-    marks: 2,
+    questions: 2,
     minutes: 10,
-    why: "One rule covers both marks: FIFO gives higher ending inventory and higher net income, LIFO gives higher COGS and lower tax.",
+    why: "One rule covers both questions: FIFO gives higher ending inventory and higher net income, LIFO gives higher COGS and lower tax.",
   },
   {
     what: "Which intangible is which, and which one never amortises",
-    marks: 2,
+    questions: 2,
     minutes: 15,
     why: "Patent, copyright, trademark, franchise, goodwill. Flashcard material — goodwill is the one that doesn't amortise.",
   },
   {
     what: "Capitalise or expense a subsequent expenditure",
-    marks: 2,
+    questions: 2,
     minutes: 15,
     why: "One rule: extends life, adds capacity, or gets it ready to use → capitalise. Routine upkeep → expense.",
   },
   {
     what: "Depreciation: straight-line and double-declining balance",
-    marks: 2,
+    questions: 2,
     minutes: 20,
     why: "Two formulas. SL subtracts residual first, DDB ignores it. Units-of-production is not on the blueprint.",
   },
   {
     what: "Bank reconciliation: which side, and which needs an entry",
-    marks: 2,
+    questions: 2,
     minutes: 20,
     why: "Bank side: deposits outstanding, checks outstanding, bank errors — no entry ever. Book side: service charges, NSF, collections, interest, your own errors — entry always.",
   },
   {
     what: "Net receivables, net revenues, cash and equivalents",
-    marks: 3,
+    questions: 3,
     minutes: 15,
     why: "Three subtractions. Drill tab → Statement figures.",
   },
   {
     what: "Gain or loss on a disposal",
-    marks: 1,
+    questions: 1,
     minutes: 10,
     why: "Cash received against BOOK VALUE, never cost. Depreciate to the sale date first.",
   },
   {
     what: "Notes receivable interest",
-    marks: 1,
+    questions: 1,
     minutes: 5,
     why: "Principal × rate × months/12. The rate is always annual.",
   },
   {
     what: "Lump-sum purchase allocation",
-    marks: 1,
+    questions: 1,
     minutes: 10,
     why: "Split by relative fair value. One percentage, one multiplication.",
   },
   {
     what: "Which inventory method suits which business, FOB terms, merchandisers",
-    marks: 2,
+    questions: 2,
     minutes: 10,
     why: "Definitions. FOB shipping point means title passes when it leaves the seller.",
   },
   {
     what: "What the allowance account is, and what a write-off does",
-    marks: 2,
+    questions: 2,
     minutes: 10,
     why: "Contra-asset, credit balance. A write-off changes neither net receivables nor net income.",
   },
   {
     what: "Executives certify the statements; cash appears on two statements",
-    marks: 2,
+    questions: 2,
     minutes: 5,
-    why: "Two facts, two marks.",
+    why: "Two facts, two questions.",
   },
 ];
 
@@ -392,11 +392,11 @@ const ACCT_EXAM_2: ExamPlan = {
       focus: "Chapter 5 — Receivables",
       minutes: 150,
       tasks: [
-        "40 min — Packet Examples 6 and 7: the POR method and the aging method, back to back, until the difference is obvious. Four of the ten Ch. 5 marks are here.",
+        "40 min — Packet Examples 6 and 7: the POR method and the aging method, back to back, until the difference is obvious. Four of the ten Ch. 5 questions are here.",
         "25 min — Activity 2, then redo Example 7's aging schedule from scratch. The practice exam never tests aging and the real one will.",
-        "25 min — Examples 1 to 4: credit sales, discounts, returns and net revenues. Four more marks.",
+        "25 min — Examples 1 to 4: credit sales, discounts, returns and net revenues. Four more questions.",
         "30 min — Example 8 and Activity 3: notes receivable and the interest accrual.",
-        "20 min — Write-offs and their effect on the accounting equation. One mark, and the answer is no net effect.",
+        "20 min — Write-offs and their effect on the accounting equation. One question, and the answer is no net effect.",
       ],
     },
     {
@@ -406,10 +406,10 @@ const ACCT_EXAM_2: ExamPlan = {
       tasks: [
         "45 min — Examples 1 and 2 plus Activity 1: COGS and ending inventory under FIFO and LIFO. The blueprint names only these two methods.",
         "20 min — Example 3, weighted average. Lower priority: taught, but the blueprint never names it.",
-        "30 min — Example 4 and Activity 4: financial statement and tax effects of each method. Two marks.",
+        "30 min — Example 4 and Activity 4: financial statement and tax effects of each method. Two questions.",
         "30 min — Activity 2 and Example 5: recording purchases and sales, and the FIFO-to-LIFO adjustment.",
         "20 min — Activity 3, lower of cost and net realizable value.",
-        "20 min — Multi-step income statement subtotals. Two marks, and operating income excludes interest and tax.",
+        "20 min — Multi-step income statement subtotals. Two questions, and operating income excludes interest and tax.",
       ],
     },
     {
@@ -419,10 +419,10 @@ const ACCT_EXAM_2: ExamPlan = {
       tasks: [
         "30 min — Example 1 and Activity 1: tangible asset cost, and the lump-sum purchase split by relative fair value.",
         "35 min — Example 2 and Activity 2: straight-line and double-declining balance. Skip Activity 3 — units-of-production is not on the blueprint.",
-        "30 min — Subsequent expenditures, capitalise versus expense. Two marks, and the practice exam barely covers it.",
+        "30 min — Subsequent expenditures, capitalise versus expense. Two questions, and the practice exam barely covers it.",
         "30 min — Example 3, the patent: R&D expensed, legal fees capitalised, shorter of legal and service life, part-year charge.",
         "30 min — Activity 4, a part-year disposal. Depreciate up to the sale date before computing the gain.",
-        "20 min — Characteristics of the different intangibles. Two marks, straight memorisation.",
+        "20 min — Characteristics of the different intangibles. Two questions, straight memorisation.",
       ],
     },
     {
@@ -767,7 +767,7 @@ export const COURSE_STUDY: Record<string, CourseStudy> = {
     slug: "ma-17000",
     approach:
       "A quarter of the grade is Excel labs and journals, which are coursework " +
-      "rather than exam material — they are the most controllable marks in the " +
+      "rather than exam material — they are the most controllable questions in the " +
       "course, so don't let them slip.",
     help: [
       {
