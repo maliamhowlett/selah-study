@@ -67,9 +67,15 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
       },
       {
         point:
+          "Sarbanes-Oxley applies ONLY to companies that file financial statements with the SEC.",
+        detail:
+          "Public companies. A private business is not covered — that limit is the point of the question when it gets asked.",
+      },
+      {
+        point:
           "Sarbanes-Oxley (2002): the CEO and CFO must personally certify the financial statements.",
         detail:
-          "It also reduced conflicts of interest, set a 7-year workpaper retention rule, and created the PCAOB. It applies to companies filing with the SEC.",
+          "It also reduced conflicts of interest, set a 7-year workpaper retention rule, and created the PCAOB.",
       },
       {
         point: "Preventive controls stop problems. Detective controls find them afterwards.",
@@ -122,9 +128,14 @@ export const ACCT_REFERENCE: ReferenceSection[] = [
         detail: "If they don't, something is on the wrong side.",
       },
       {
-        point: "Replenishing petty cash records the expenses; the Petty Cash account itself does not move.",
+        point:
+          "Petty cash expenditures are recorded as the individual expenses, crediting Cash. The Petty Cash account itself never moves.",
         detail:
-          "Cash returned = fund size − cash remaining. If receipts don't match that, the difference is Cash Over and Short.",
+          "Your packet asks why, and your answer is the reason: the fund is replenished back to its set amount, so the balance in Petty Cash is always that amount. It only changes if you resize the fund.",
+      },
+      {
+        point: "Establishing the fund is the one entry that touches Petty Cash.",
+        detail: "Dr Petty Cash Fund / Cr Cash. A voucher is a receipt.",
       },
       {
         point: "Cash is reported on the balance sheet and on the statement of cash flows.",

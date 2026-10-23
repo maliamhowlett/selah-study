@@ -127,14 +127,14 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
     id: "d-petty-replenish",
     chapter: "Ch. 4",
     prompt:
-      "Replenish the $300 petty cash fund. Receipts total $240 for supplies, and $55 cash remains in the box.",
+      "A $225 petty cash fund has been used for an office lunch of $75 and a notary fee of $10. Record the expenditures.",
     entry: [
-      { account: "Supplies Expense", debit: 240 },
-      { account: "Cash Over and Short", debit: 5 },
-      { account: "Cash", credit: 245 },
+      { account: "Office Meals", debit: 75 },
+      { account: "Professional Fees", debit: 10 },
+      { account: "Cash", credit: 85 },
     ],
     note:
-      "$300 − $55 remaining = $245 to put back. Receipts only account for $240, so $5 is short.",
+      "This is Activity 3 from your Ch. 4 packet. The expenses are recorded individually and Cash is credited — Petty Cash is not touched, because the fund gets replenished back to $225 either way.",
   },
 
   // --- Chapter 5: receivables ---

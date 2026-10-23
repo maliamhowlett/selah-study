@@ -60,7 +60,6 @@ const ALIASES: Record<string, string> = {
   "int revenue": "interest revenue",
   "int receivable": "interest receivable",
   "equip": "equipment",
-  "cash over short": "cash over and short",
 };
 
 /** Words that carry no meaning for matching an account name. */

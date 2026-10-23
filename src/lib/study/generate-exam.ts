@@ -94,29 +94,27 @@ const bankRec: Generator = (id) => {
 };
 
 const pettyCash: Generator = (id) => {
-  const fund = between(200, 500, 50);
-  const remaining = between(20, 80, 5);
-  const receipts = fund - remaining - between(-5, 5, 5);
-  const toReplenish = fund - remaining;
+  const fund = between(150, 400, 25);
+  const a = between(20, 80, 5);
+  const b = between(10, 60, 5);
+  const spent = a + b;
 
   return {
     id,
     number: 0,
     topic: CH4,
     prompt:
-      `A ${usd(fund)} petty cash fund is being replenished. Receipts total ` +
-      `${usd(receipts)} and ${usd(remaining)} in cash remains in the box. How much ` +
-      `cash goes back into the fund?`,
-    ...options(toReplenish, [receipts, fund, remaining]),
+      `A ${usd(fund)} petty cash fund has been used for an office lunch of ` +
+      `${usd(a)} and a notary fee of ${usd(b)}. When the expenditures are ` +
+      `recorded, how much is credited to Cash?`,
+    ...options(spent, [fund, fund - spent, a]),
     answer:
-      `  Fund size        ${usd(fund)}\n` +
-      `  Less cash left  (${usd(remaining)})\n` +
-      `  To replenish     ${usd(toReplenish)}\n\n` +
-      `You always top the fund back up to its full size. Receipts of ${usd(receipts)} ` +
-      `against ${usd(toReplenish)} of cash means ` +
-      (receipts === toReplenish
-        ? `it balances exactly.`
-        : `${usd(Math.abs(toReplenish - receipts))} goes to Cash Over and Short.`),
+      `  Office meals        ${usd(a)}\n` +
+      `  Professional fees   ${usd(b)}\n` +
+      `  Credit to Cash      ${usd(spent)}\n\n` +
+      `The expenses are recorded individually and Cash is credited for the ` +
+      `total spent. The Petty Cash account is NOT touched — the fund is ` +
+      `replenished back to ${usd(fund)} regardless, so its balance never changes.`,
   };
 };
 
