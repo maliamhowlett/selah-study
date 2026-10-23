@@ -76,7 +76,8 @@ Keep it faithful to the transcript. Do not invent content. If the transcript is 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
+        // llama-3.1-8b-instant was retired by Groq along with the 3.3 models.
+        model: "openai/gpt-oss-20b",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

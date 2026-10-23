@@ -13,6 +13,7 @@ import {
 } from "@/lib/study/acct-drills";
 import { gradeEntry, type GradeResult, type SubmittedLine } from "@/lib/study/grade-entry";
 import { useStoredValue, writeStoredValue } from "@/lib/study/local-store";
+import AskTutor from "./AskTutor";
 
 // "shown" is asking to be taught, which is not the same as getting it wrong —
 // conflating them makes the whole record useless for deciding what to study.
@@ -268,6 +269,16 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
   const chipOn = `rounded-full border px-3 py-1.5 text-xs ${accentBorder} ${accentTint} ${accentText}`;
   const inputClass =
     "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none";
+
+  const tutorContext = !current
+    ? undefined
+    : kind === "journal"
+      ? `Journal entry drill (${(current as JournalDrill).chapter}): ${(current as JournalDrill).prompt}\nCorrect entry: ${(current as JournalDrill).entry
+          .map((l) => `${l.account} ${l.debit !== undefined ? `debit ${l.debit}` : `credit ${l.credit}`}`)
+          .join("; ")}`
+      : kind === "statement"
+        ? `Statement figure drill. Data:\n${(current as StatementDrill).scenario}\nQuestion: ${(current as StatementDrill).question}\nAnswer: ${(current as StatementDrill).answer}`
+        : `Account classification drill. Account: ${(current as ClassificationDrill).account}. It belongs on the ${(current as ClassificationDrill).statement}, in ${(current as ClassificationDrill).section}, normal balance ${(current as ClassificationDrill).normalBalance}.`;
 
   const showMeButton = (
     <button
@@ -633,6 +644,13 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                   Filed as one to come back to, not as a wrong answer.
                 </p>
               )}
+
+              <AskTutor
+                context={tutorContext}
+                accentText={accentText}
+                accentBorder={accentBorder}
+                accentTint={accentTint}
+              />
 
               <button
                 type="button"
