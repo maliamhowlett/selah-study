@@ -227,3 +227,55 @@ export function gradeEntry(entry: EntryLine[], lines: SubmittedLine[]): GradeRes
 
   return { verdict, notes, unbalanced };
 }
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Words that only say what KIND of account something is. Leaving one off —
+ * "service fee" for Service Fee Expense — is not a vocabulary gap, and marking
+ * it wrong both discourages and corrupts the record of what is actually known.
+ */
+const GENERIC_TAIL = new Set([
+  "expense", "revenue", "payable", "receivable", "fund", "income", "cost", "account",
+]);
+
+export type AccountMatch = "exact" | "partial" | "ambiguous" | "wrong";
+
+/**
+ * Compares a typed account against the intended one, allowing a missing
+ * type-word — but only when that abbreviation couldn't equally mean a
+ * different account. "Interest" matches both Interest Revenue and Interest
+ * Receivable, so it asks rather than guessing; "service fee" can only be one
+ * thing, so it passes.
+ */
+export function matchAccount(
+  typed: string,
+  target: string,
+  everyAccount: string[] = [],
+): AccountMatch {
+  const got = normalizeAccount(typed);
+  if (!got) return "wrong";
+  if (got === normalizeAccount(target)) return "exact";
+
+  const isPartialOf = (candidate: string) => {
+    const want = normalizeAccount(candidate).split(" ");
+    const have = got.split(" ");
+    if (have.length >= want.length) return false;
+    // Every word typed must appear in the target, in order.
+    let i = 0;
+    for (const word of want) {
+      if (word === have[i]) i += 1;
+    }
+    if (i !== have.length) return false;
+    // And everything left over must be a mere type-word.
+    return want.filter((w) => !have.includes(w)).every((w) => GENERIC_TAIL.has(w));
+  };
+
+  if (!isPartialOf(target)) return "wrong";
+
+  const alsoMatches = everyAccount.filter(
+    (candidate) =>
+      normalizeAccount(candidate) !== normalizeAccount(target) && isPartialOf(candidate),
+  );
+  return alsoMatches.length > 0 ? "ambiguous" : "partial";
+}

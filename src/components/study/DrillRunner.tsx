@@ -13,7 +13,7 @@ import {
   type JournalDrill,
   type StatementDrill,
 } from "@/lib/study/acct-drills";
-import { gradeEntry, normalizeAccount, type GradeResult, type SubmittedLine } from "@/lib/study/grade-entry";
+import { gradeEntry, matchAccount, type AccountMatch, type GradeResult, type SubmittedLine } from "@/lib/study/grade-entry";
 import { useStoredValue, writeStoredValue } from "@/lib/study/local-store";
 import AskTutor from "./AskTutor";
 
@@ -52,6 +52,10 @@ function parseResults(raw: string | null): Record<string, Record_> {
 function needsWork(record?: Record_): boolean {
   return record !== undefined && record.result !== "got";
 }
+
+/** Every account in the bank, so a shortened answer can be tested for
+ * ambiguity against the others rather than just against the right one. */
+const ALL_ACCOUNT_NAMES = ACCOUNT_DRILLS.map((d) => d.account);
 
 const money = (n: number) =>
   n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -125,6 +129,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
   // Account-vocabulary attempt state.
   const [guess, setGuess] = useState("");
   const [guessSide, setGuessSide] = useState<string | null>(null);
+  const [ambiguous, setAmbiguous] = useState(false);
 
   const [revealed, setRevealed] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -191,6 +196,7 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     setFigure("");
     setGuess("");
     setGuessSide(null);
+    setAmbiguous(false);
     setChecked(false);
     setRevealed(false);
   };
@@ -239,16 +245,28 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
     return Number.isFinite(typed) && Math.abs(typed - drill.answer) < 0.005;
   };
 
-  const accountRight = () => {
+  const accountVerdict = (): { match: AccountMatch; sideOk: boolean } => {
     const drill = current as AccountDrill;
-    return (
-      normalizeAccount(guess) === normalizeAccount(drill.account) &&
-      guessSide === drill.side
-    );
+    return {
+      match: matchAccount(guess, drill.account, ALL_ACCOUNT_NAMES),
+      sideOk: guessSide === drill.side,
+    };
+  };
+
+  const accountRight = () => {
+    const { match, sideOk } = accountVerdict();
+    return (match === "exact" || match === "partial") && sideOk;
   };
 
   const checkAccount = () => {
     const drill = current as AccountDrill;
+    // An abbreviation that could mean two different accounts isn't wrong, it
+    // just isn't an answer yet — so it asks again rather than recording a miss.
+    if (accountVerdict().match === "ambiguous") {
+      setAmbiguous(true);
+      return;
+    }
+    setAmbiguous(false);
     setChecked(true);
     const right = accountRight();
     record(drill.id, right ? "got" : "missed", right ? "correct" : "wrong");
@@ -434,6 +452,13 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
                   </button>
                 ))}
               </div>
+              {ambiguous && (
+                <p className="mt-3 border-l-2 border-assignment bg-assignment-light px-3.5 py-2.5 text-sm leading-relaxed text-foreground">
+                  &ldquo;{guess.trim()}&rdquo; could be more than one account here. Add the
+                  rest of the name and check again.
+                </p>
+              )}
+
               {!checked && !revealed && (
                 <div className="mt-4 flex flex-wrap gap-3">
                   <button
@@ -653,9 +678,25 @@ export default function DrillRunner({ accentText, accentBorder, accentTint }: Pr
               )}
 
               {!revealed && kind === "account" && (
-                <p className={`text-lg ${accountRight() ? "text-success" : "text-exam"}`}>
-                  {accountRight() ? "Correct." : "Not right."}
-                </p>
+                <>
+                  <p className={`text-lg ${accountRight() ? "text-success" : "text-exam"}`}>
+                    {accountRight() ? "Correct." : "Not right."}
+                  </p>
+                  {accountRight() && accountVerdict().match === "partial" && (
+                    <p className="text-sm leading-relaxed text-muted">
+                      Counted right — on the exam, write the full name:{" "}
+                      <span className="text-foreground">
+                        {(current as AccountDrill).account}
+                      </span>
+                      .
+                    </p>
+                  )}
+                  {!accountRight() && accountVerdict().match !== "wrong" && (
+                    <p className="text-sm leading-relaxed text-muted">
+                      The account was right — it&apos;s the side that was wrong.
+                    </p>
+                  )}
+                </>
               )}
 
               {!revealed && kind === "statement" && (
