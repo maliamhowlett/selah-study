@@ -84,6 +84,156 @@ export const JOURNAL_DRILLS: JournalDrill[] = [
     ],
   },
 
+  {
+    id: "d8-note-issue",
+    chapter: "Ch. 8",
+    prompt:
+      "On 1 September the company borrows $100,000 from the bank, signing a 6%, six-month note. Record the borrowing.",
+    entry: [
+      { account: "Cash", debit: 100000 },
+      { account: "Notes Payable", credit: 100000 },
+    ],
+    note: "The Southwest Airlines example from your slides. Only the principal is recorded now — no interest has been incurred yet.",
+  },
+  {
+    id: "d8-note-accrue",
+    chapter: "Ch. 8",
+    prompt:
+      "Same note: $100,000 at 6%, signed 1 September. The year ends 31 December. Record the adjusting entry for interest.",
+    entry: [
+      { account: "Interest Expense", debit: 2000 },
+      { account: "Interest Payable", credit: 2000 },
+    ],
+    note:
+      "September to December is FOUR months, not three — both ends count. $100,000 × 6% × 4/12 = $2,000. Interest is recorded when incurred, not when paid.",
+  },
+  {
+    id: "d8-note-repay",
+    chapter: "Ch. 8",
+    prompt:
+      "The note matures on 1 March. Repay the $100,000 plus all six months of interest, $2,000 of which was accrued at the year end.",
+    entry: [
+      { account: "Notes Payable", debit: 100000 },
+      { account: "Interest Payable", debit: 2000 },
+      { account: "Interest Expense", debit: 1000 },
+      { account: "Cash", credit: 103000 },
+    ],
+    note:
+      "Total interest is $3,000. The $2,000 already accrued clears the payable; January and February's $1,000 is this year's expense.",
+  },
+  {
+    id: "d8-payroll-employee",
+    chapter: "Ch. 8",
+    prompt:
+      "January payroll is $100,000. Income tax withheld is $24,000 and FICA is 7.65%. Record the employee salary expense and withholdings.",
+    entry: [
+      { account: "Salaries Expense", debit: 100000 },
+      { account: "Employee Income Tax Payable", credit: 24000 },
+      { account: "FICA Tax Payable", credit: 7650 },
+      { account: "Salaries Payable", credit: 68350 },
+    ],
+    note:
+      "The expense is the FULL $100,000 — withholding doesn't reduce it, it just splits where the money goes. $100,000 − $24,000 − $7,650 = $68,350 actually owed to employees.",
+  },
+  {
+    id: "d8-payroll-fringe",
+    chapter: "Ch. 8",
+    prompt:
+      "The same employer pays $5,000 of health insurance premiums and $10,000 into the retirement plan on its employees' behalf. Record it.",
+    entry: [
+      { account: "Salaries Expense", debit: 15000 },
+      { account: "Fringe Benefits Payable", credit: 15000 },
+    ],
+    note: "Employer fringe benefits are Salaries Expense, not Payroll Tax Expense.",
+  },
+  {
+    id: "d8-payroll-taxes",
+    chapter: "Ch. 8",
+    prompt:
+      "The employer owes its own FICA at 7.65% and unemployment tax at 6.0% on that $100,000 payroll. Record the employer payroll taxes.",
+    entry: [
+      { account: "Payroll Tax Expense", debit: 13650 },
+      { account: "FICA Tax Payable", credit: 7650 },
+      { account: "Unemployment Tax Payable", credit: 6000 },
+    ],
+    note:
+      "The employer MATCHES the employees' FICA, and pays unemployment tax that is never withheld from anyone. $7,650 + $6,000 = $13,650.",
+  },
+  {
+    id: "d8-gift-card-sale",
+    chapter: "Ch. 8",
+    prompt: "A customer buys a $100 gift card.",
+    entry: [
+      { account: "Cash", debit: 100 },
+      { account: "Deferred Revenue", credit: 100 },
+    ],
+    note: "No revenue yet — you owe them $100 of goods. Deferred Revenue is a liability despite its name.",
+  },
+  {
+    id: "d8-gift-card-use",
+    chapter: "Ch. 8",
+    prompt: "That customer uses $15 of the gift card. Record the revenue (ignore cost of goods sold).",
+    entry: [
+      { account: "Deferred Revenue", debit: 15 },
+      { account: "Sales Revenue", credit: 15 },
+    ],
+    note: "The liability shrinks as the obligation is satisfied, and only now is revenue earned.",
+  },
+  {
+    id: "d8-sales-tax",
+    chapter: "Ch. 8",
+    prompt: "A restaurant sells lunch for $15 plus 10% sales tax, in cash.",
+    entry: [
+      { account: "Cash", debit: 16.5 },
+      { account: "Sales Revenue", credit: 15 },
+      { account: "Sales Tax Payable", credit: 1.5 },
+    ],
+    note: "Revenue is the price, never the total collected. The tax is the government's money passing through.",
+  },
+  {
+    id: "d8-current-portion",
+    chapter: "Ch. 8",
+    prompt:
+      "A $1,000,000 long-term note has $200,000 falling due within the next twelve months. Reclassify it at the year end.",
+    entry: [
+      { account: "Notes Payable (long-term)", debit: 200000 },
+      { account: "Notes Payable (short-term)", credit: 200000 },
+    ],
+    note: "Nothing is paid and no expense arises — this only moves it on the balance sheet.",
+  },
+  {
+    id: "d8-warranty-estimate",
+    chapter: "Ch. 8",
+    prompt:
+      "December sales are $1.5 million and warranty costs are estimated at 3% of sales. Record the year-end adjustment.",
+    entry: [
+      { account: "Warranty Expense", debit: 45000 },
+      { account: "Warranty Liability", credit: 45000 },
+    ],
+    note: "$1.5m × 3% = $45,000. The expense belongs to the period of the SALE, not of the future repair.",
+  },
+  {
+    id: "d8-warranty-claim",
+    chapter: "Ch. 8",
+    prompt: "In January, $12,000 of warranty claims are actually paid in cash.",
+    entry: [
+      { account: "Warranty Liability", debit: 12000 },
+      { account: "Cash", credit: 12000 },
+    ],
+    note:
+      "No expense here — it was already recorded when the liability was estimated. Same shape as writing off a receivable against the allowance.",
+  },
+  {
+    id: "d8-contingent",
+    chapter: "Ch. 8",
+    prompt:
+      "A company will probably lose a lawsuit, and the loss is reasonably estimated at $100,000. Record it.",
+    entry: [
+      { account: "Loss", debit: 100000 },
+      { account: "Contingent Liability", credit: 100000 },
+    ],
+    note: "Both tests must pass — probable AND reasonably estimable. If either fails, nothing is recorded.",
+  },
   // --- Chapter 4: cash and internal controls ---
   {
     id: "d-service-charge",
@@ -810,6 +960,101 @@ export const ACCOUNT_DRILLS: AccountDrill[] = [
     why: "Revenue increases with a credit. Earned is what matters, not paid.",
   },
 
+
+  // Ch. 8 — nearly all credit accounts, which is the half the drills showed
+  // was missing. Learning this chapter properly is the repair.
+  {
+    id: "a8-notes-payable",
+    chapter: "Ch. 8",
+    situation: "The company signs a note at the bank promising to repay what it borrows plus interest.",
+    account: "Notes Payable",
+    side: "Credit",
+    why: "Owed, so a liability, so a credit. The mirror of Notes Receivable in chapter 5.",
+  },
+  {
+    id: "a8-interest-payable",
+    chapter: "Ch. 8",
+    situation: "Interest on that note has built up at year end but hasn't been paid.",
+    account: "Interest Payable",
+    side: "Credit",
+    why: "Incurred and owed. The matching debit is Interest Expense.",
+  },
+  {
+    id: "a8-interest-expense",
+    chapter: "Ch. 8",
+    situation: "The cost of that borrowed money, on the income statement.",
+    account: "Interest Expense",
+    side: "Debit",
+  },
+  {
+    id: "a8-income-tax-payable",
+    chapter: "Ch. 8",
+    situation: "Income tax withheld from employees' paychecks, not yet sent to the government.",
+    account: "Employee Income Tax Payable",
+    side: "Credit",
+    why: "Held on the employees' behalf and owed to the government.",
+  },
+  {
+    id: "a8-fica",
+    chapter: "Ch. 8",
+    situation: "Social Security and Medicare owed — both the employees' share and the employer's match.",
+    account: "FICA Tax Payable",
+    side: "Credit",
+    why: "7.65% each side. Both halves land in the same payable.",
+  },
+  {
+    id: "a8-unemployment",
+    chapter: "Ch. 8",
+    situation: "FUTA and SUTA owed on behalf of employees — the tax the employer alone pays.",
+    account: "Unemployment Tax Payable",
+    side: "Credit",
+  },
+  {
+    id: "a8-payroll-tax-expense",
+    chapter: "Ch. 8",
+    situation: "The employer's own payroll taxes, as a cost on the income statement.",
+    account: "Payroll Tax Expense",
+    side: "Debit",
+    why: "Employer TAXES go here. Employer fringe benefits go to Salaries Expense instead.",
+  },
+  {
+    id: "a8-fringe",
+    chapter: "Ch. 8",
+    situation: "Health insurance and retirement contributions the employer owes to Blue Cross and Fidelity.",
+    account: "Fringe Benefits Payable",
+    side: "Credit",
+  },
+  {
+    id: "a8-sales-tax",
+    chapter: "Ch. 8",
+    situation: "Tax collected from a customer at the till, owed on to the government.",
+    account: "Sales Tax Payable",
+    side: "Credit",
+    why: "Never an expense — the company is only holding it.",
+  },
+  {
+    id: "a8-warranty-liability",
+    chapter: "Ch. 8",
+    situation: "The estimated future cost of repairs promised on goods already sold.",
+    account: "Warranty Liability",
+    side: "Credit",
+    why: "Goes UP by the estimate, and DOWN by a debit as actual repairs are made.",
+  },
+  {
+    id: "a8-warranty-expense",
+    chapter: "Ch. 8",
+    situation: "That same estimate, as it hits the income statement in the period of the sale.",
+    account: "Warranty Expense",
+    side: "Debit",
+  },
+  {
+    id: "a8-contingent",
+    chapter: "Ch. 8",
+    situation: "A lawsuit the company will probably lose, for an amount it can reasonably estimate.",
+    account: "Contingent Liability",
+    side: "Credit",
+    why: "Only recorded when BOTH tests pass: probable, and reasonably estimable.",
+  },
   // Ch. 4
   {
     id: "a-service-fee",

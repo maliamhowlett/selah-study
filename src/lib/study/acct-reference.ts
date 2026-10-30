@@ -27,6 +27,189 @@ export interface ReferenceSection {
 }
 
 export const ACCT_REFERENCE: ReferenceSection[] = [
+  // -------------------------------------------------------------------------
+  // Chapter 8 — taken from the slide deck, in teaching order rather than
+  // exam order. There is no blueprint for this one yet, so the counts are
+  // omitted rather than invented; `questions` carries the number of learning
+  // objectives covered instead.
+  // -------------------------------------------------------------------------
+  {
+    id: "r8-current",
+    chapter: "Ch. 8",
+    title: "LO 8.1 — Current vs long-term liabilities",
+    questions: 1,
+    points: [
+      {
+        point:
+          "A liability is an obligation to transfer some economic benefit in the future.",
+        detail:
+          "Usually cash — accounts payable, notes payable, salaries payable. But deferred revenue is a liability too, and what it owes is goods or services rather than money.",
+      },
+      {
+        point: "Current = due within one year of the balance sheet date. Long-term = more than a year.",
+      },
+      {
+        point:
+          "Unless the operating cycle is longer than a year, in which case the cycle defines it.",
+        detail:
+          "The operating cycle runs from spending cash to provide goods until collecting cash from the customer. A winery with a 15-month cycle calls anything due within 15 months current.",
+      },
+    ],
+  },
+  {
+    id: "r8-notes",
+    chapter: "Ch. 8",
+    title: "LO 8.2 — Notes payable and interest",
+    questions: 1,
+    points: [
+      {
+        point: "Interest = face value × annual rate × fraction of the year.",
+        detail: "Same formula as notes RECEIVABLE in chapter 5 — only the side changes.",
+      },
+      {
+        point:
+          "Count the months inclusively. September 1 to December 31 is FOUR months, not three.",
+        detail:
+          "The deck flags this as Common Mistake 1: subtracting month 9 from month 12 gives three and is wrong, because both September and December count.",
+      },
+      {
+        point: "Interest is recorded in the period it is INCURRED, not the period it is paid.",
+        detail:
+          "So a note signed in September needs an adjusting entry at the December year end even though no cash has moved.",
+      },
+      {
+        point: "Line of credit: borrow up to a prearranged limit, and interest only starts when funds are drawn.",
+      },
+      {
+        point: "Commercial paper: borrowing from another company rather than a bank, 30 to 270 days, usually a lower rate.",
+      },
+    ],
+  },
+  {
+    id: "r8-payroll",
+    chapter: "Ch. 8",
+    title: "LO 8.3 — Payroll liabilities",
+    questions: 1,
+    points: [
+      {
+        point: "FICA is 7.65% — and BOTH sides pay it.",
+        detail:
+          "6.2% Social Security up to a maximum base, plus 1.45% Medicare with no maximum. Common Mistake 2 in the deck: people think only the employee pays. The employer matches it, doubling what reaches Social Security.",
+      },
+      {
+        point: "Unemployment taxes (FUTA and SUTA) are paid by the EMPLOYER only.",
+        detail:
+          "Never withheld from a paycheck. This is the concept-check answer: asked which item the employer alone pays, it is unemployment tax.",
+      },
+      {
+        point: "Withheld from the employee: income taxes, their half of FICA, their insurance and retirement contributions.",
+        detail: "Withholding does not reduce Salaries Expense — the full gross pay is the expense, and the withholdings become payables.",
+      },
+      {
+        point: "Paid on top by the employer: matching FICA, unemployment taxes, and fringe benefits.",
+        detail:
+          "Employer fringe benefits go to Salaries Expense; employer taxes go to Payroll Tax Expense. Two different expense accounts.",
+      },
+      {
+        point: "A full payroll is three separate entries.",
+        list: [
+          { term: "Employee salary and withholdings", gloss: "Dr Salaries Expense" },
+          { term: "Employer fringe benefits", gloss: "Dr Salaries Expense" },
+          { term: "Employer payroll taxes", gloss: "Dr Payroll Tax Expense" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "r8-other",
+    chapter: "Ch. 8",
+    title: "LO 8.4 — Other current liabilities",
+    questions: 1,
+    points: [
+      {
+        point: "Deferred Revenue is a LIABILITY, not a revenue account.",
+        detail:
+          "Common Mistake 3 in the deck, and the word in the title is what causes it. You owe the customer goods or services, so it is credited when cash comes in and debited as you earn it.",
+      },
+      {
+        point: "Sales tax collected is not an expense — it is money held for the government.",
+        detail:
+          "Sell something for $15 with 10% tax: Cash 16.50 debited, Sales Revenue 15.00 and Sales Tax Payable 1.50 credited. Revenue is the price, never the total collected.",
+      },
+      {
+        point:
+          "The current portion of long-term debt moves to current liabilities, by reclassification rather than payment.",
+        detail:
+          "Dr Notes Payable (long-term) / Cr Notes Payable (short-term). Nothing is paid and no expense arises — it only changes where it sits on the balance sheet.",
+      },
+    ],
+  },
+  {
+    id: "r8-contingencies",
+    chapter: "Ch. 8",
+    title: "LO 8.5 — Contingencies and warranties",
+    questions: 1,
+    points: [
+      {
+        point:
+          "Record a contingent liability only when a loss is BOTH probable AND reasonably estimable.",
+        detail:
+          "Likelihood runs probable (likely) → reasonably possible (more than remote, less than probable) → remote (slight). Both tests have to pass before anything is recorded.",
+      },
+      {
+        point: "Contingent GAINS are never recorded until the gain is certain.",
+        detail:
+          "In a lawsuit the defendant has a contingent liability and the plaintiff has a contingent gain — and only one of them books anything. Conservatism.",
+      },
+      {
+        point: "Warranties are the most common contingent liability, and they take two entries at different times.",
+        list: [
+          { term: "At the sale, estimated", gloss: "Dr Warranty Expense / Cr Warranty Liability" },
+          { term: "When repairs happen", gloss: "Dr Warranty Liability / Cr Cash" },
+        ],
+      },
+      {
+        point: "Warranty Expense and Warranty Liability are almost never equal.",
+        detail:
+          "Common Mistake 4. The liability goes UP by the estimate and DOWN by actual claims. Estimate 5% of $300,000 sales = $15,000, pay out $10,400, and the liability ends at $4,600 — while the expense was $15,000.",
+      },
+      {
+        point: "Warranty expense belongs to the period of the SALE, not the period of the repair.",
+      },
+    ],
+  },
+  {
+    id: "r8-liquidity",
+    chapter: "Ch. 8",
+    title: "LO 8.6 — Liquidity ratios",
+    questions: 1,
+    points: [
+      {
+        point: "Three measures, all about paying debts that are about to come due:",
+        list: [
+          { term: "Working capital", gloss: "current assets − current liabilities" },
+          { term: "Current ratio", gloss: "current assets ÷ current liabilities" },
+          { term: "Acid-test ratio", gloss: "quick assets ÷ current liabilities" },
+        ],
+      },
+      {
+        point:
+          "Quick assets are cash, current investments and accounts receivable — and nothing else.",
+        detail:
+          "Inventory and prepaid rent are excluded, because they can't be turned into cash quickly. That exclusion is the whole difference between the current ratio and the acid-test.",
+      },
+      {
+        point: "A higher current ratio is usually better, but not always.",
+        detail:
+          "Common Mistake 5: a company failing to collect its receivables or sitting on unsold inventory also shows a high current ratio. Both of those are problems.",
+      },
+      {
+        point: "Working capital is a poor way to compare two different companies.",
+        detail: "It is an absolute number, so size dominates. The ratios scale, which is why they compare better.",
+      },
+    ],
+  },
+
   {
     id: "r-internal-control",
     chapter: "Ch. 4",
