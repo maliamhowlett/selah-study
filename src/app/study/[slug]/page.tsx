@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CLASSES } from "@/lib/classes";
 import { COURSE_STYLES, detectCourse } from "@/lib/calendar/courses";
 import { COURSE_STUDY, campusToday, campusWeekday, daysUntil } from "@/lib/study/plans";
-import { ACCT_MOCK_EXAM } from "@/lib/study/acct-exam";
+import { ACCT_MOCK_EXAM, CH8_CONCEPT_CHECKS } from "@/lib/study/acct-exam";
 import DayPlan from "@/components/study/DayPlan";
 import DrillRunner from "@/components/study/DrillRunner";
 import GeneratedExam from "@/components/study/GeneratedExam";
@@ -47,6 +47,9 @@ export default async function CourseStudyPage({
   const weekday = campusWeekday();
   // The drill bank and the practice exam are ACCT-specific so far.
   const hasDrills = slug === "acct-20000";
+  // Once the exam is behind her the countdown is just a dead number, and the
+  // cram-shaped tabs stop being the point.
+  const examPassed = away !== null && away < 0;
   const blueprintFor = (chapter: string) =>
     plan?.blueprint?.find((b) => b.chapter === chapter);
 
@@ -79,12 +82,23 @@ export default async function CourseStudyPage({
             </p>
             <p className={`mt-2 text-4xl italic sm:text-5xl ${course.text}`}>
               {away < 0
-                ? "has passed"
+                ? "done"
                 : away === 0
                   ? "is today"
                   : `${away} day${away === 1 ? "" : "s"} away`}
             </p>
-            <dl className="mt-6 grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-3">
+            {away < 0 && (
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground">
+                Chapter 8 is up next, and it is the whole credit side — notes
+                payable, payroll, deferred revenue, warranties. Learn and Drill
+                below both cover it.
+              </p>
+            )}
+            <dl
+              className={`mt-6 grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-3 ${
+                away < 0 ? "hidden" : ""
+              }`}
+            >
               <div>
                 <dt className="text-muted">When</dt>
                 <dd className="text-foreground">{plan.when}</dd>
@@ -100,7 +114,7 @@ export default async function CourseStudyPage({
             </dl>
           </section>
 
-          <section className="mb-14">
+          <section className={`mb-14 ${examPassed ? "hidden" : ""}`}>
             <h2 className="mb-4 text-3xl italic text-foreground">Where you stand</h2>
             <div className="flex flex-col gap-3">
               {plan.situation.map((line) => (
@@ -266,6 +280,20 @@ export default async function CourseStudyPage({
                     ),
                   },
                   hasDrills && {
+                    id: "concept",
+                    label: "Chapter 8 check",
+                    blurb:
+                      "The Concept Check questions from your own slide deck, with the answers held back until you finish. These are the deck's questions, not mine — the closest thing to checking you've understood a chapter before any practice exam exists for it.",
+                    content: (
+                      <MockExam
+                        exam={CH8_CONCEPT_CHECKS}
+                        accentText={course.text}
+                        accentBorder={course.border}
+                        accentTint={course.tint}
+                      />
+                    ),
+                  },
+                  hasDrills && {
                     id: "generated",
                     label: "New exam each time",
                     blurb:
@@ -292,7 +320,13 @@ export default async function CourseStudyPage({
                       />
                     ),
                   },
-                ].filter(Boolean) as StudyMode[]
+                ]
+                  .filter(Boolean)
+                  .sort((a, b) => {
+                    if (!examPassed) return 0;
+                    const order = ["learn", "drill", "concept", "generated", "problems", "exam", "triage", "plan"];
+                    return order.indexOf((a as StudyMode).id) - order.indexOf((b as StudyMode).id);
+                  }) as StudyMode[]
               }
             />
           </section>

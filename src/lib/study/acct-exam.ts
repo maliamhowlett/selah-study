@@ -661,3 +661,137 @@ export const ACCT_MOCK_EXAM: MockExam = {
     },
   ],
 };
+
+// ---------------------------------------------------------------------------
+// The Concept Check slides from the chapter 8 deck, with the publisher's own
+// answers and explanations. Not written by me and not generated — these are
+// the questions the deck itself poses, which makes them the closest thing to
+// "have I understood this" that exists before a practice exam does.
+// ---------------------------------------------------------------------------
+
+const C8 = "Ch. 8 — Current liabilities";
+
+export const CH8_CONCEPT_CHECKS: MockExam = {
+  title: "Chapter 8 concept checks",
+  source: "The Concept Check slides from your deck, with the answers held back.",
+  minutes: 12,
+  questions: [
+    {
+      id: "cc8-1",
+      number: 1,
+      topic: C8,
+      prompt: "Which of the following is typically considered a current liability?",
+      choices: [
+        "Salaries payable.",
+        "Prepaid insurance.",
+        "Mortgage payable due in 30 years.",
+        "Accounts receivable.",
+      ],
+      correct: 0,
+      answer:
+        "Current liabilities are due within one year, and salaries payable generally are.\n\n" +
+        "Prepaid insurance and accounts receivable are ASSETS, not liabilities at all — " +
+        "the trap is reading quickly and matching on the word rather than the type. " +
+        "The 30-year mortgage is a liability but a long-term one.",
+    },
+    {
+      id: "cc8-2",
+      number: 2,
+      topic: C8,
+      prompt:
+        "On October 1, a company signs a $10,000, 5%, 6-month note payable. How much interest would be recorded by December 31 of the same year?",
+      choices: ["$250.", "$125.", "$500.", "$0."],
+      correct: 1,
+      answer:
+        "Interest runs from signing (10/1) to the year end (12/31) — October, November, December = 3 months.\n\n" +
+        "  $10,000 × 5% × 3/12 = $125\n\n" +
+        "$250 is the full six months, which isn't what's being asked. $500 is a whole year. " +
+        "$0 assumes nothing is recorded until payment, which is the mistake Key Point 2 exists to prevent — " +
+        "interest is recorded when INCURRED.",
+    },
+    {
+      id: "cc8-3",
+      number: 3,
+      topic: C8,
+      prompt: "Which of the following items is typically paid by the employer only?",
+      choices: [
+        "Federal and state income taxes on employees' wages.",
+        "Social Security taxes.",
+        "Federal and state unemployment taxes.",
+        "Medicare taxes.",
+      ],
+      correct: 2,
+      answer:
+        "Unemployment taxes (FUTA and SUTA) are paid solely by the employer and never withheld from a paycheck.\n\n" +
+        "Income taxes are withheld from employees. Social Security and Medicare are FICA — withheld from " +
+        "employees AND matched by the employer, so neither is employer-only.",
+    },
+    {
+      id: "cc8-4",
+      number: 4,
+      topic: C8,
+      prompt:
+        "A home improvement store sells merchandise to a customer. The price is $200 and the sales tax rate is 6.5%. How much would be recorded in the sales tax payable account?",
+      choices: ["$13.00.", "$213.00.", "$130.00.", "None of the above."],
+      correct: 0,
+      answer:
+        "  $200 × 6.5% = $13.00\n\n" +
+        "The full entry:\n" +
+        "Dr Cash                 213.00\n" +
+        "   Cr Sales Revenue       200.00\n" +
+        "   Cr Sales Tax Payable    13.00\n\n" +
+        "$213 is the total cash collected, not the tax. Revenue stays at the price.",
+    },
+    {
+      id: "cc8-5",
+      number: 5,
+      topic: C8,
+      prompt: "Which of the following statements is true with respect to warranty liabilities?",
+      choices: [
+        "Warranty expense needs to be recorded in the period the warranty repair is made.",
+        "The warranty expense account balance will always equal the warranty liability account balance.",
+        "The warranty liability account is debited as actual repairs are made.",
+        "All of the above are true.",
+      ],
+      correct: 2,
+      answer:
+        "The liability goes UP by the estimate and DOWN by a debit as repairs actually happen.\n\n" +
+        "(a) is wrong: the expense belongs to the period of the SALE, not the repair.\n" +
+        "(b) is Common Mistake 4 — the two are rarely equal, because the expense is one period's " +
+        "estimate while the liability is whatever estimate is left unspent.",
+    },
+    {
+      id: "cc8-6",
+      number: 6,
+      topic: C8,
+      prompt:
+        "During its first year of business, Oceanic, Inc. has sales of $300,000 and pays warranty claims of $10,400. Oceanic offers a one-year warranty and anticipates warranty costs will total 5% of sales. What is the balance in Oceanic's Warranty Liability account at the end of the first year?",
+      choices: ["$15,000.", "$4,600.", "$25,400.", "$20,800."],
+      correct: 1,
+      answer:
+        "  Estimate     $300,000 × 5% = 15,000   (credit to the liability)\n" +
+        "  Claims paid                 (10,400)  (debit to the liability)\n" +
+        "  Ending liability               4,600\n\n" +
+        "$15,000 is the EXPENSE, not the ending liability — picking it is exactly the " +
+        "confusion Common Mistake 4 warns about. Same shape as the allowance: estimate in, " +
+        "actual claims out, and the leftover is what the account carries.",
+    },
+    {
+      id: "cc8-7",
+      number: 7,
+      topic: C8,
+      prompt: "The current ratio is:",
+      choices: [
+        "Computed as the difference between current assets and current liabilities.",
+        "Computed as current assets divided by current liabilities.",
+        "A measure of profitability.",
+        "All of the above.",
+      ],
+      correct: 1,
+      answer:
+        "Current ratio = current assets ÷ current liabilities.\n\n" +
+        "(a) describes WORKING CAPITAL, which is the subtraction. (c) is wrong on a second " +
+        "count: all three liquidity measures are about paying debts as they come due, not about profit.",
+    },
+  ],
+};
